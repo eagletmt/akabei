@@ -1,7 +1,16 @@
+require 'akabei/error'
 require 'pathname'
 
 module Akabei
   class ChrootTree
+    class CommandFailed < Error
+      attr_reader :args
+      def initialize(args)
+        super("command failed: #{args.join(' ')}")
+        @args = args
+      end
+    end
+
     def initialize(root, arch)
       @root = Pathname.new(root)
       @arch = arch
@@ -15,7 +24,9 @@ module Akabei
     end
 
     def remove
-      execute('rm', '-rf', @root.to_s)
+      if @root.directory?
+        execute('rm', '-rf', @root.to_s)
+      end
     end
 
     def makechrootpkg(dir, env)
@@ -43,7 +54,9 @@ module Akabei
         end
       end
 
-      system('sudo', '-p', "[sudo] akabei requires root to execute #{command}: ", 'setarch', @arch, *args)
+      unless system('sudo', '-p', "[sudo] akabei requires root to execute #{command}: ", 'setarch', @arch, *args)
+        raise CommandFailed.new(args)
+      end
     end
   end
 end

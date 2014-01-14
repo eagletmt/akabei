@@ -25,25 +25,22 @@ module Akabei
           PKGDEST: tmp_pkgdest.realpath,
           LOGDEST: logdest.realpath,
         }
-        if @chroot_tree.makechrootpkg(dir.to_s, env)
-          tmp_pkgdest.each_child.map do |package_path|
-            begin
-              dest = pkgdest.join(package_path.basename)
-              FileUtils.cp(package_path.to_s, dest.to_s)
-              if signer
-                signer.detach_sign(dest)
-              end
-              Package.new(dest)
-            rescue => e
-              begin
-                dest.unlink
-              rescue Errno::ENOENT
-              end
-              raise e
+        @chroot_tree.makechrootpkg(dir.to_s, env)
+        tmp_pkgdest.each_child.map do |package_path|
+          begin
+            dest = pkgdest.join(package_path.basename)
+            FileUtils.cp(package_path.to_s, dest.to_s)
+            if signer
+              signer.detach_sign(dest)
             end
+            Package.new(dest)
+          rescue => e
+            begin
+              dest.unlink
+            rescue Errno::ENOENT
+            end
+            raise e
           end
-        else
-          raise Error.new("makechrootpkg #{dir} failed!")
         end
       end
     end
