@@ -18,6 +18,8 @@ module Akabei
     def_delegator(:@db, :each)
 
     def load(path)
+      path = Pathname.new(path)
+      return unless path.readable?
       verify!(path)
       ArchiveUtils.each_entry(path) do |entry, archive|
         pkgname, key = *entry.pathname.split('/', 2)
