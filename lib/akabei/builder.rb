@@ -16,7 +16,7 @@ module Akabei
       @chroot_tree = chroot_tree
     end
 
-    def build(dir)
+    def build_package(dir)
       Dir.mktmpdir do |tmp_pkgdest|
         tmp_pkgdest = Pathname.new(tmp_pkgdest)
         env = {
