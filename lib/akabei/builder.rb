@@ -10,6 +10,7 @@ module Akabei
         instance_variable_set("@#{attr}", Pathname.new(val))
       end
     end
+    attr_accessor :signer
 
     def initialize(chroot_tree)
       @chroot_tree = chroot_tree
@@ -25,8 +26,20 @@ module Akabei
         }
         if @chroot_tree.makechrootpkg(dir.to_s, env)
           tmp_pkgdest.each_child.map do |package_path|
-            FileUtils.cp(package_path.to_s, pkgdest.to_s)
-            Package.new(pkgdest.join(package_path.basename))
+            begin
+              dest = pkgdest.join(package_path.basename)
+              FileUtils.cp(package_path.to_s, dest.to_s)
+              if signer
+                signer.detach_sign(dest)
+              end
+              Package.new(dest)
+            rescue => e
+              begin
+                dest.unlink
+              rescue Errno::ENOENT
+              end
+              raise e
+            end
           end
         else
           raise Error.new("makechrootpkg #{dir} failed!")
