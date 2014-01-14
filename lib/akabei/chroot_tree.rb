@@ -10,6 +10,7 @@ module Akabei
     BASE_PACKAGES = %w[base base-devel sudo]
 
     def create
+      @root.mkpath
       mkarchroot(*BASE_PACKAGES)
     end
 
