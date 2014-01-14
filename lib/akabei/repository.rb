@@ -7,6 +7,8 @@ require 'tmpdir'
 
 module Akabei
   class Repository
+    attr_accessor :signer
+
     def initialize
       @db = {}
     end
@@ -68,6 +70,15 @@ module Akabei
       false
     end
 
+    def verify!(path)
+      if signer && File.readable?("#{path}.sig")
+        signer.verify!(path)
+        true
+      else
+        false
+      end
+    end
+
     def save(path)
       #XXX: Guess compression and format
       Archive::Writer.open_filename(path, Archive::COMPRESSION_GZIP, Archive::FORMAT_TAR) do |archive|
@@ -77,6 +88,10 @@ module Akabei
           create_db(dir, archive)
         end
       end
+      if signer
+        signer.detach_sign(path)
+      end
+      nil
     end
 
     def store_tree(topdir)

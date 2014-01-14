@@ -27,6 +27,15 @@ module Akabei
       end
     end
 
+    class InvalidSignature < Error
+      attr_reader :path, :from
+      def initialize(path, from)
+        @path = path
+        @from = from
+        super("Invalid signature from #{from}: #{path}")
+      end
+    end
+
     def initialize(gpg_key)
       @gpg_key = find_secret_key(gpg_key)
       @crypto = GPGME::Crypto.new
@@ -36,6 +45,18 @@ module Akabei
       File.open(path) do |inp|
         File.open("#{path}.sig", 'w') do |out|
           @crypto.detach_sign(inp, signer: @gpg_key, output: out)
+        end
+      end
+    end
+
+    def verify!(path)
+      File.open("#{path}.sig") do |sig|
+        File.open(path) do |f|
+          @crypto.verify(sig, signed_text: f) do |signature|
+            unless signature.valid?
+              raise InvalidSignature.new(path, signature.from)
+            end
+          end
         end
       end
     end
