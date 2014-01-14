@@ -1,3 +1,4 @@
+require 'akabei/attr_path'
 require 'akabei/error'
 require 'akabei/package'
 require 'fileutils'
@@ -5,12 +6,8 @@ require 'tmpdir'
 
 module Akabei
   class Builder
-    [:srcdest, :pkgdest, :logdest].each do |attr|
-      attr_reader attr
-      define_method("#{attr}=") do |val|
-        instance_variable_set("@#{attr}", Pathname.new(val))
-      end
-    end
+    extend AttrPath
+    attr_path_accessor :srcdest, :pkgdest, :logdest
     attr_accessor :signer
 
     def initialize(chroot_tree)

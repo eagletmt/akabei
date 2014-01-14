@@ -1,3 +1,4 @@
+require 'akabei/attr_path'
 require 'akabei/error'
 require 'pathname'
 
@@ -10,6 +11,9 @@ module Akabei
         @args = args
       end
     end
+
+    extend AttrPath
+    attr_path_accessor :makepkg_config, :pacman_config
 
     def initialize(root, arch)
       @root = Pathname.new(root)
@@ -34,7 +38,14 @@ module Akabei
     end
 
     def mkarchroot(*args)
-      execute('mkarchroot', @root.join('root').to_s, *args)
+      cmd = ['mkarchroot']
+      [['-M', makepkg_config], ['-C', pacman_config]].each do |flag, path|
+        if path
+          cmd << flag << path.to_s
+        end
+      end
+      cmd << @root.join('root').to_s
+      execute(*(cmd + args))
     end
 
     def arch_nspawn(*args)
