@@ -1,3 +1,4 @@
+require 'akabei/error'
 require 'akabei/package'
 require 'fileutils'
 require 'tmpdir'
@@ -43,6 +44,35 @@ module Akabei
           end
         else
           raise Error.new("makechrootpkg #{dir} failed!")
+        end
+      end
+    end
+
+    def with_source_package(dir, &block)
+      dir = Pathname.new(dir)
+      Dir.mktmpdir do |tmp_srcpkgdest|
+        tmp_srcpkgdest = Pathname.new(tmp_srcpkgdest)
+        Dir.mktmpdir do |builddir|
+          builddir = Pathname.new(builddir)
+          env = {
+            'SRCDEST' => srcdest.realpath.to_s,
+            'SRCPKGDEST' => tmp_srcpkgdest.realpath.to_s,
+            'BUILDDIR' => builddir.realpath.to_s,
+          }
+          unless system(env, 'makepkg', '--source', chdir: dir)
+            raise Error.new("makepkg --source failed: #{dir}")
+          end
+        end
+        children = tmp_srcpkgdest.each_child.to_a
+        if children.empty?
+          raise Error.new("makepkg --source generated nothing: #{dir}")
+        elsif children.size > 1
+          raise Error.new("makepkg --source generated multiple files???: #{dir}: #{children.map(&:to_s)}")
+        else
+          srcpkg = children.first
+          # Remove symlink created by makepkg
+          dir.join(srcpkg.basename).unlink
+          block.call(srcpkg)
         end
       end
     end
