@@ -1,7 +1,7 @@
 require 'akabei/error'
 
 module Akabei
-  class PkgInfo
+  class PackageInfo
     ARRAY_ATTRIBUTES = %w[
       checkdepend
       conflict

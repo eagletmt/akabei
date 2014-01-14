@@ -1,7 +1,7 @@
 require 'akabei/archive_utils'
 require 'akabei/error'
 require 'akabei/package_entry'
-require 'akabei/pkg_info'
+require 'akabei/package_info'
 require 'base64'
 require 'digest'
 
@@ -28,7 +28,7 @@ module Akabei
     def extract_pkginfo
       ArchiveUtils.each_entry(@path.to_s) do |entry, archive|
         if entry.pathname == '.PKGINFO'
-          return PkgInfo.parse(archive.read_data)
+          return PackageInfo.parse(archive.read_data)
         end
       end
       raise NotFound.new(@path, '.PKGINFO')
