@@ -18,6 +18,7 @@ module Akabei
     def_delegator(:@db, :each)
 
     def load(path)
+      verify!(path)
       ArchiveUtils.each_entry(path) do |entry, archive|
         pkgname, key = *entry.pathname.split('/', 2)
         if key.include?('/')
