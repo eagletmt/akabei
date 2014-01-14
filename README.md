@@ -1,4 +1,5 @@
 # Akabei
+[![Code Climate](https://codeclimate.com/github/eagletmt/akabei.png)](https://codeclimate.com/github/eagletmt/akabei)
 
 Custom repository manager for ArchLinux pacman.
 
