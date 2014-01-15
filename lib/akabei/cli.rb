@@ -76,6 +76,7 @@ module Akabei
       builder.pkgdest = repo_path
 
       db_path = repo_path.join("#{repo_name}.db")
+      files_path = repo_path.join("#{repo_name}.files")
       repo.load(db_path)
 
       abs = Akabei::Abs.new(repo_path.join("#{repo_name}.abs.tar.gz"), builder)
@@ -87,7 +88,8 @@ module Akabei
           repo.add(package)
         end
         abs.add(package_dir)
-        repo.save(db_path)
+        repo.save(db_path, false)
+        repo.save(files_path, true)
       ensure
         chroot.remove
       end

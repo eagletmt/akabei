@@ -28,7 +28,7 @@ PKGBUILD
 % akabei build foo --chroot-dir /tmp/chroot-x86_64 --repository-dir repo/x86_64 --repository-name bar --arch x86_64
 (snip)
 % ls repo/x86_64
-bar.abs.tar.gz  bar.db  foo-1.0.0-1-x86_64.pkg.tar.xz
+bar.abs.tar.gz  bar.db  bar.files  foo-1.0.0-1-x86_64.pkg.tar.xz
 ```
 
 With full options:
@@ -37,7 +37,7 @@ With full options:
 % akabei build foo --chroot-dir /tmp/chroot-x86_64 --repository-dir repo/x86_64 --repository-name bar --arch x86_64 --package-key $GPGKEY --repository-key $GPGKEY --pacman-config pacman.x86_64.conf --makepkg-config makepkg.x86_64.conf --srcdest sources --logdest logs
 (snip)
 % ls repo/x86_64
-bar.abs.tar.gz  bar.db  bar.db.sig  foo-1.0.0-1-x86_64.pkg.tar.xz  foo-1.0.0-1-x86_64.pkg.tar.xz.sig
+bar.abs.tar.gz  bar.db  bar.db.sig  bar.files  bar.files.sig  foo-1.0.0-1-x86_64.pkg.tar.xz  foo-1.0.0-1-x86_64.pkg.tar.xz.sig
 % ls sources
 foo-1.0.0.tar.gz
 % ls logs

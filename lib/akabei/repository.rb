@@ -82,12 +82,11 @@ module Akabei
       end
     end
 
-    def save(path)
-      #XXX: Guess compression and format
+    def save(path, include_files)
       Archive::Writer.open_filename(path.to_s, Archive::COMPRESSION_GZIP, Archive::FORMAT_TAR) do |archive|
         Dir.mktmpdir do |dir|
           dir = Pathname.new(dir)
-          store_tree(dir)
+          store_tree(dir, include_files)
           create_db(dir, archive)
         end
       end
@@ -97,7 +96,7 @@ module Akabei
       nil
     end
 
-    def store_tree(topdir)
+    def store_tree(topdir, include_files)
       @db.each do |db_name, pkg_entry|
         pkgdir = topdir.join(db_name)
         pkgdir.mkpath
@@ -106,6 +105,11 @@ module Akabei
         end
         pkgdir.join('depends').open('w') do |f|
           pkg_entry.write_depends(f)
+        end
+        if include_files
+          pkgdir.join('files').open('w') do |f|
+            pkg_entry.write_files(f)
+          end
         end
       end
     end
@@ -118,13 +122,16 @@ module Akabei
           entry.copy_stat(topdir.join(entry.pathname).to_s)
           archive.write_header(entry)
         end
-        %w[desc depends].each do |fname|
-          archive.new_entry do |entry|
-            entry.pathname = "#{db_name}/#{fname}"
-            path = topdir.join(entry.pathname)
-            entry.copy_stat(path.to_s)
-            archive.write_header(entry)
-            archive.write_data(path.read)
+        %w[desc depends files].each do |fname|
+          pathname = "#{db_name}/#{fname}"
+          path = topdir.join(pathname)
+          if path.readable?
+            archive.new_entry do |entry|
+              entry.pathname = pathname
+              entry.copy_stat(path.to_s)
+              archive.write_header(entry)
+              archive.write_data(path.read)
+            end
           end
         end
       end

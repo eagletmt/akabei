@@ -75,6 +75,12 @@ module Akabei
       end
     end
 
+    def write_files(io)
+      ARRAY_FILES_ATTRIBUTES.each do |attr|
+        write_array(io, attr)
+      end
+    end
+
     def write_array(io, attr)
       arr = instance_variable_get("@#{attr}")
       unless arr.empty?

@@ -117,6 +117,16 @@ module Akabei
       end
     end
 
+    def files
+      xs = []
+      ArchiveUtils.each_entry(@path) do |entry|
+        unless entry.pathname.start_with?('.')
+          xs << entry.pathname
+        end
+      end
+      xs.sort
+    end
+
     def to_entry
       entry = PackageEntry.new
       %w[
@@ -144,6 +154,8 @@ module Akabei
         optdepends
         makedepends
         checkdepends
+
+        files
       ].each do |attr|
         val = send(attr)
         if val.is_a?(Array)
