@@ -6,14 +6,13 @@ require 'tmpdir'
 
 module Akabei
   class Abs
-    def initialize(path, repo_name, builder)
+    def initialize(path, repo_name)
       @path = Pathname.new(path)
       @repo_name = repo_name
-      @builder = builder
     end
 
-    def add(dir)
-      @builder.with_source_package(dir) do |srcpkg|
+    def add(dir, builder)
+      builder.with_source_package(dir) do |srcpkg|
         Dir.mktmpdir do |tree|
           tree = Pathname.new(tree)
           root = tree.join(@repo_name)
@@ -39,6 +38,23 @@ module Akabei
         end
       end
       raise Error.new("Cannot detect pkgname from #{srcpkg}")
+    end
+
+    def remove(package_name)
+      unless @path.readable?
+        raise Error.new("No such file: #{@path}")
+      end
+
+      Dir.mktmpdir do |tree|
+        tree = Pathname.new(tree)
+        ArchiveUtils.extract_all(@path, tree)
+        root = tree.join(@repo_name)
+        unless root.directory?
+          raise Error.new("No such repository: #{@repo_name}")
+        end
+        FileUtils.rm_rf(root.join(package_name))
+        ArchiveUtils.archive_all(tree, @path, Archive::COMPRESSION_GZIP, Archive::FORMAT_TAR)
+      end
     end
   end
 end

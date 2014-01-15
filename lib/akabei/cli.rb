@@ -81,7 +81,7 @@ module Akabei
       repo_db.load(db_path)
       repo_files.load(files_path)
 
-      abs = Abs.new(repo_path.join("#{repo_name}.abs.tar.gz"), repo_name, builder)
+      abs = Abs.new(repo_path.join("#{repo_name}.abs.tar.gz"), repo_name)
 
       chroot.with_chroot do
         packages = builder.build_package(package_dir, chroot)
@@ -89,7 +89,7 @@ module Akabei
           repo_db.add(package)
           repo_files.add(package)
         end
-        abs.add(package_dir)
+        abs.add(package_dir, builder)
         repo_db.save(db_path)
         repo_files.save(files_path)
       end
@@ -108,8 +108,19 @@ module Akabei
     def abs_add(package_dir, abs_path)
       builder = Builder.new
       builder.srcdest = options[:srcdest]
-      abs = Abs.new(abs_path, options[:repository_name], builder)
-      abs.add(package_dir)
+      abs = Abs.new(abs_path, options[:repository_name])
+      abs.add(package_dir, builder)
+    end
+
+    desc 'abs-remove PKG_NAME ABS_TARBALL', 'Remove PKG_NAME from ABS_TARBALL'
+    option :repository_name,
+      desc: 'Name of the repository',
+      banner: 'NAME',
+      type: :string,
+      required: true
+    def abs_remove(package_name, abs_path)
+      abs = Abs.new(abs_path, options[:repository_name])
+      abs.remove(package_name)
     end
   end
 end
