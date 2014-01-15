@@ -54,7 +54,7 @@ module Akabei
       enum: %w[i686 x86_64],
       required: true
     def build(package_dir)
-      chroot = Akabei::ChrootTree.new(options[:chroot_dir], options[:arch])
+      chroot = ChrootTree.new(options[:chroot_dir], options[:arch])
       if options[:makepkg_config]
         chroot.makepkg_config = options[:makepkg_config]
       end
@@ -62,13 +62,13 @@ module Akabei
         chroot.pacman_config = options[:pacman_config]
       end
 
-      repo_db = Akabei::Repository.new
-      repo_db.signer = options[:repository_key] && Akabei::Signer.new(options[:repository_key])
-      repo_files = Akabei::Repository.new
+      repo_db = Repository.new
+      repo_db.signer = options[:repository_key] && Signer.new(options[:repository_key])
+      repo_files = Repository.new
       repo_files.include_files = true
 
-      builder = Akabei::Builder.new
-      builder.signer = options[:package_key] && Akabei::Signer.new(options[:package_key])
+      builder = Builder.new
+      builder.signer = options[:package_key] && Signer.new(options[:package_key])
       builder.srcdest = options[:srcdest]
       builder.logdest = options[:logdest]
 
@@ -81,7 +81,7 @@ module Akabei
       repo_db.load(db_path)
       repo_files.load(files_path)
 
-      abs = Akabei::Abs.new(repo_path.join("#{repo_name}.abs.tar.gz"), repo_name, builder)
+      abs = Abs.new(repo_path.join("#{repo_name}.abs.tar.gz"), repo_name, builder)
 
       chroot.with_chroot do
         packages = builder.build_package(package_dir, chroot)
@@ -106,9 +106,9 @@ module Akabei
       type: :string,
       required: true
     def abs_add(package_dir, abs_path)
-      builder = Akabei::Builder.new
+      builder = Builder.new
       builder.srcdest = options[:srcdest]
-      abs = Akabei::Abs.new(abs_path, options[:repository_name], builder)
+      abs = Abs.new(abs_path, options[:repository_name], builder)
       abs.add(package_dir)
     end
   end
