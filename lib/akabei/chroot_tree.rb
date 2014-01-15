@@ -53,7 +53,6 @@ module Akabei
     end
 
     def execute(*args)
-      command = args[0]
       if args.last.is_a?(Hash)
         opts = args.last
         if opts.has_key?(:env)
@@ -65,7 +64,8 @@ module Akabei
         end
       end
 
-      unless system('sudo', '-p', "[sudo] akabei requires root to execute #{command}: ", 'setarch', @arch, *args)
+      puts "Execute: #{args.join(' ')}"
+      unless system('sudo', 'setarch', @arch, *args)
         raise CommandFailed.new(args)
       end
     end
