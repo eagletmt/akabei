@@ -10,6 +10,37 @@ require 'tmpdir'
 
 module Akabei
   class CLI < Thor
+    module CommonOptions
+      COMMON_OPTIONS = {
+        repository_key: {
+          desc: 'GPG key to sign repository database',
+          banner: 'GPGKEY',
+          type: :string
+        },
+        repository_name: {
+          desc: 'Name of the repository',
+          banner: 'NAME',
+          type: :string,
+          required: true,
+        },
+        srcdest: {
+          desc: 'Path to the directory to store sources',
+          banner: 'FILE',
+          type: :string,
+        },
+      }.freeze
+
+      def common_options(*opts)
+        opts.each do |opt|
+          unless COMMON_OPTIONS.has_key?(opt)
+            raise "No such common option: #{opt}"
+          end
+          option(opt, COMMON_OPTIONS[opt])
+        end
+      end
+    end
+    extend CommonOptions
+
     desc 'build DIR', 'Build package in chroot environment'
     option :chroot_dir,
       desc: 'Path to chroot top',
@@ -27,14 +58,6 @@ module Akabei
       desc: 'GPG key to sign packages',
       banner: 'GPGKEY',
       type: :string
-    option :repository_key,
-      desc: 'GPG key to sign repository database',
-      banner: 'GPGKEY',
-      type: :string
-    option :srcdest,
-      desc: 'Path to the directory to store sources',
-      banner: 'FILE',
-      type: :string
     option :logdest,
       desc: 'Path to the directory to store logs',
       banner: 'FILE',
@@ -44,16 +67,12 @@ module Akabei
       banner: 'DIR',
       type: :string,
       required: true
-    option :repository_name,
-      desc: 'Name of the repository',
-      banner: 'NAME',
-      type: :string,
-      required: true
     option :arch,
       desc: 'Archtecture',
       banner: 'ARCH',
       enum: %w[i686 x86_64],
       required: true
+    common_options :repository_name, :repository_key, :srcdest
     def build(package_dir)
       chroot = ChrootTree.new(options[:chroot_dir], options[:arch])
       if options[:makepkg_config]
@@ -97,15 +116,7 @@ module Akabei
     end
 
     desc 'abs-add DIR ABS_TARBALL', 'Add the package inside DIR to ABS_TARBALL'
-    option :srcdest,
-      desc: 'Path to the directory to store sources',
-      banner: 'FILE',
-      type: :string
-    option :repository_name,
-      desc: 'Name of the repository',
-      banner: 'NAME',
-      type: :string,
-      required: true
+    common_options :repository_name, :srcdest
     def abs_add(package_dir, abs_path)
       builder = Builder.new
       builder.srcdest = options[:srcdest]
@@ -114,21 +125,14 @@ module Akabei
     end
 
     desc 'abs-remove PKG_NAME ABS_TARBALL', 'Remove PKG_NAME from ABS_TARBALL'
-    option :repository_name,
-      desc: 'Name of the repository',
-      banner: 'NAME',
-      type: :string,
-      required: true
+    common_options :repository_name
     def abs_remove(package_name, abs_path)
       abs = Abs.new(abs_path, options[:repository_name])
       abs.remove(package_name)
     end
 
     desc 'repo-add PACKAGE_PATH REPOSITORY_DB', 'Add PACKAGE_PATH to REPOSITORY_DB'
-    option :repository_key,
-      desc: 'GPG key to sign repository database',
-      banner: 'GPGKEY',
-      type: :string
+    common_options :repository_key
     def repo_add(package_path, db_path)
       repo = Repository.new
       repo.signer = options[:repository_key] && Signer.new(options[:repository_key])
@@ -138,10 +142,7 @@ module Akabei
     end
 
     desc 'repo-remove PACKAGE_NAME REPOSITORY_DB', 'Remove PACKAGE_NAME from REPOSITORY_DB'
-    option :repository_key,
-      desc: 'GPG key to sign repository database',
-      banner: 'GPGKEY',
-      type: :string
+    common_options :repository_key
     def repo_remove(package_name, db_path)
       repo = Repository.new
       repo.signer = options[:repository_key] && Signer.new(options[:repository_key])
