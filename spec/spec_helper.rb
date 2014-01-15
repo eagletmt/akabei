@@ -4,6 +4,31 @@
 # loaded once.
 #
 # See http://rubydoc.info/gems/rspec-core/RSpec/Core/Configuration
+
+require 'pathname'
+
+module TestData
+  ROOT = Pathname.new(__FILE__).parent.join('data')
+  INPUT_ROOT = ROOT.join('input')
+  DEST_ROOT = ROOT.join('dest')
+
+  def test_input(path)
+    INPUT_ROOT.join(path)
+  end
+
+  def test_dest(path)
+    DEST_ROOT.join(path)
+  end
+
+  def self.prepare_dest
+    DEST_ROOT.mkpath
+  end
+
+  def self.clean_dest
+    DEST_ROOT.rmtree
+  end
+end
+
 RSpec.configure do |config|
   # Limit the spec run to only specs with the focus metadata. If no specs have
   # the filtering metadata and `run_all_when_everything_filtered = true` then
@@ -20,4 +45,12 @@ RSpec.configure do |config|
   # the seed, which is printed after each run.
   #     --seed 1234
   #config.order = 'random'
+
+  config.include TestData
+  config.before(:each) do
+    TestData.prepare_dest
+  end
+  config.after(:each) do
+    TestData.clean_dest
+  end
 end

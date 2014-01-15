@@ -12,6 +12,14 @@ module Akabei
       end
     end
 
+    def list_paths(path)
+      paths = []
+      each_entry(path) do |entry|
+        paths << entry.pathname
+      end
+      paths
+    end
+
     BUFSIZ = 8192
 
     def extract_all(src, dest)
@@ -30,7 +38,7 @@ module Akabei
 
     def archive_all(src, dest, comp, format)
       Archive::Writer.open_filename(dest.to_s, comp, format) do |archive|
-        list_paths(src).sort.each do |path|
+        list_tree_paths(src).sort.each do |path|
           archive.new_entry do |entry|
             entry.pathname = path.relative_path_from(src).to_s
             is_dir = path.directory?
@@ -51,7 +59,7 @@ module Akabei
       end
     end
 
-    def list_paths(dir)
+    def list_tree_paths(dir)
       paths = []
       q = dir.each_child.to_a
       until q.empty?
