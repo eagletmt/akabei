@@ -84,7 +84,7 @@ module Akabei
 
     def save(path)
       #XXX: Guess compression and format
-      Archive::Writer.open_filename(path, Archive::COMPRESSION_GZIP, Archive::FORMAT_TAR) do |archive|
+      Archive::Writer.open_filename(path.to_s, Archive::COMPRESSION_GZIP, Archive::FORMAT_TAR) do |archive|
         Dir.mktmpdir do |dir|
           dir = Pathname.new(dir)
           store_tree(dir)
