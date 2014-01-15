@@ -5,7 +5,9 @@ module Akabei
     def attr_path_writer(*attrs)
       attrs.each do |attr|
         define_method("#{attr}=") do |val|
-          instance_variable_set("@#{attr}", Pathname.new(val))
+          unless val.nil?
+            instance_variable_set("@#{attr}", Pathname.new(val))
+          end
         end
       end
     end
