@@ -65,7 +65,8 @@ module Akabei
       repo = Akabei::Repository.new
       repo.signer = options[:repository_key] && Akabei::Signer.new(options[:repository_key])
 
-      builder = Akabei::Builder.new(chroot)
+      builder = Akabei::Builder.new
+      builder.chroot_tree = chroot
       builder.signer = options[:package_key] && Akabei::Signer.new(options[:package_key])
       builder.srcdest = options[:srcdest]
       builder.logdest = options[:logdest]
@@ -89,6 +90,23 @@ module Akabei
         repo.save(db_path, false)
         repo.save(files_path, true)
       end
+    end
+
+    desc 'abs-add DIR ABS_TARBALL', 'Add the package inside DIR to ABS_TARBALL'
+    option :srcdest,
+      desc: 'Path to the directory to store sources',
+      banner: 'FILE',
+      type: :string
+    option :repository_name,
+      desc: 'Name of the repository',
+      banner: 'NAME',
+      type: :string,
+      required: true
+    def abs_add(package_dir, abs_path)
+      builder = Akabei::Builder.new
+      builder.srcdest = options[:srcdest]
+      abs = Akabei::Abs.new(abs_path, options[:repository_name], builder)
+      abs.add(package_dir)
     end
   end
 end

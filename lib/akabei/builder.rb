@@ -8,11 +8,7 @@ module Akabei
   class Builder
     extend AttrPath
     attr_path_accessor :srcdest, :pkgdest, :logdest
-    attr_accessor :signer
-
-    def initialize(chroot_tree)
-      @chroot_tree = chroot_tree
-    end
+    attr_accessor :chroot_tree, :signer
 
     def build_package(dir)
       Dir.mktmpdir do |tmp_pkgdest|
