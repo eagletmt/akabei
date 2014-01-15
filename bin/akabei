@@ -1,0 +1,9 @@
+#!/usr/bin/env ruby
+require 'akabei/cli'
+require 'akabei/thor_handler'
+
+exit_code = Akabei::ThorHandler.wrap do
+  Akabei::CLI.start(ARGV)
+end
+
+exit exit_code
