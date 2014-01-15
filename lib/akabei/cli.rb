@@ -1,6 +1,7 @@
 require 'akabei/abs'
 require 'akabei/builder'
 require 'akabei/chroot_tree'
+require 'akabei/package'
 require 'akabei/repository'
 require 'akabei/signer'
 require 'pathname'
@@ -121,6 +122,50 @@ module Akabei
     def abs_remove(package_name, abs_path)
       abs = Abs.new(abs_path, options[:repository_name])
       abs.remove(package_name)
+    end
+
+    desc 'repo-add PACKAGE_PATH REPOSITORY_DB', 'Add PACKAGE_PATH to REPOSITORY_DB'
+    option :repository_key,
+      desc: 'GPG key to sign repository database',
+      banner: 'GPGKEY',
+      type: :string
+    def repo_add(package_path, db_path)
+      repo = Repository.new
+      repo.signer = options[:repository_key] && Signer.new(options[:repository_key])
+      repo.load(db_path)
+      repo.add(Package.new(package_path))
+      repo.save(db_path)
+    end
+
+    desc 'repo-remove PACKAGE_NAME REPOSITORY_DB', 'Remove PACKAGE_NAME from REPOSITORY_DB'
+    option :repository_key,
+      desc: 'GPG key to sign repository database',
+      banner: 'GPGKEY',
+      type: :string
+    def repo_remove(package_name, db_path)
+      repo = Repository.new
+      repo.signer = options[:repository_key] && Signer.new(options[:repository_key])
+      repo.load(db_path)
+      repo.remove(package_name)
+      repo.save(db_path)
+    end
+
+    desc 'files-add PACKAGE_PATH FILES_DB', 'Add PACKAGE_PATH to FILES_DB'
+    def files_add(package_path, db_path)
+      repo = Repository.new
+      repo.include_files = true
+      repo.load(db_path)
+      repo.add(Package.new(package_path))
+      repo.save(db_path)
+    end
+
+    desc 'files-remove PACKAGE_NAME FILES_DB', 'Remove PACKAGE_NAME from FILES_DB'
+    def files_remove(package_name, db_path)
+      repo = Repository.new
+      repo.include_files = true
+      repo.load(db_path)
+      repo.remove(package_name)
+      repo.save(db_path)
     end
   end
 end
