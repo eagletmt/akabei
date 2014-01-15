@@ -21,25 +21,31 @@ module Akabei
               LOGDEST: logdest.realpath,
             }
             chroot_tree.makechrootpkg(dir.to_s, env)
-            tmp_pkgdest.each_child.map do |package_path|
-              begin
-                dest = pkgdest.join(package_path.basename)
-                FileUtils.cp(package_path.to_s, dest.to_s)
-                if signer
-                  signer.detach_sign(dest)
-                end
-                Package.new(dest)
-              rescue => e
-                begin
-                  dest.unlink
-                rescue Errno::ENOENT
-                end
-                raise e
-              end
-            end
+            gather_packages(tmp_pkgdest)
           end
         end
       end
+    end
+
+    def gather_packages(tmp_pkgdest)
+      tmp_pkgdest.each_child.map do |package_path|
+        dest = pkgdest.join(package_path.basename)
+        copy_and_sign_package(package_path, dest)
+        Package.new(dest)
+      end
+    end
+
+    def copy_and_sign_package(package_path, dest)
+      FileUtils.cp(package_path.to_s, dest.to_s)
+      if signer
+        signer.detach_sign(dest)
+      end
+    rescue => e
+      begin
+        dest.unlink
+      rescue Errno::ENOENT
+      end
+      raise e
     end
 
     def wrap_dir(attr, &block)
@@ -65,28 +71,37 @@ module Akabei
         tmp_srcpkgdest = Pathname.new(tmp_srcpkgdest)
         Dir.mktmpdir do |builddir|
           builddir = Pathname.new(builddir)
-          wrap_dir(:srcdest)  do
-            env = {
-              'SRCDEST' => srcdest.realpath.to_s,
-              'SRCPKGDEST' => tmp_srcpkgdest.realpath.to_s,
-              'BUILDDIR' => builddir.realpath.to_s,
-            }
-            unless system(env, 'makepkg', '--source', chdir: dir)
-              raise Error.new("makepkg --source failed: #{dir}")
-            end
-          end
-          children = tmp_srcpkgdest.each_child.to_a
-          if children.empty?
-            raise Error.new("makepkg --source generated nothing: #{dir}")
-          elsif children.size > 1
-            raise Error.new("makepkg --source generated multiple files???: #{dir}: #{children.map(&:to_s)}")
-          else
-            srcpkg = children.first
-            # Remove symlink created by makepkg
-            dir.join(srcpkg.basename).unlink
-            block.call(srcpkg)
+          wrap_dir(:srcdest) do
+            makepkg_source(dir, srcdest, tmp_srcpkgdest, builddir)
           end
         end
+
+        srcpkg = find_source_package(tmp_srcpkgdest)
+        # Remove symlink created by makepkg
+        dir.join(srcpkg.basename).unlink
+        block.call(srcpkg)
+      end
+    end
+
+    def makepkg_source(dir, srcdest, srcpkgdest, builddir)
+      env = {
+        'SRCDEST' => srcdest.realpath.to_s,
+        'SRCPKGDEST' => srcpkgdest.realpath.to_s,
+        'BUILDDIR' => builddir.realpath.to_s,
+      }
+      unless system(env, 'makepkg', '--source', chdir: dir)
+        raise Error.new("makepkg --source failed: #{dir}")
+      end
+    end
+
+    def find_source_package(srcpkgdest)
+      children = srcpkgdest.each_child.to_a
+      if children.empty?
+        raise Error.new("makepkg --source generated nothing")
+      elsif children.size > 1
+        raise Error.new("makepkg --source generated multiple files???: #{children.map(&:to_s)}")
+      else
+        children.first
       end
     end
   end
