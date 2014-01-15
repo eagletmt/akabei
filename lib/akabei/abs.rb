@@ -19,7 +19,7 @@ module Akabei
           root = tree.join(@repo_name)
           root.mkpath
           if @path.readable?
-            ArchiveUtils.extract_all(@path, root)
+            ArchiveUtils.extract_all(@path, tree)
           end
           pkgname = detect_pkgname(srcpkg)
           FileUtils.rm_rf(root.join(pkgname).to_s)
