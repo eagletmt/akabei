@@ -66,7 +66,6 @@ module Akabei
       repo.signer = options[:repository_key] && Akabei::Signer.new(options[:repository_key])
 
       builder = Akabei::Builder.new
-      builder.chroot_tree = chroot
       builder.signer = options[:package_key] && Akabei::Signer.new(options[:package_key])
       builder.srcdest = options[:srcdest]
       builder.logdest = options[:logdest]
@@ -82,7 +81,7 @@ module Akabei
       abs = Akabei::Abs.new(repo_path.join("#{repo_name}.abs.tar.gz"), repo_name, builder)
 
       chroot.with_chroot do
-        packages = builder.build_package(package_dir)
+        packages = builder.build_package(package_dir, chroot)
         packages.each do |package|
           repo.add(package)
         end

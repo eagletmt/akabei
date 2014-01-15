@@ -8,9 +8,9 @@ module Akabei
   class Builder
     extend AttrPath
     attr_path_accessor :srcdest, :pkgdest, :logdest
-    attr_accessor :chroot_tree, :signer
+    attr_accessor :signer
 
-    def build_package(dir)
+    def build_package(dir, chroot_tree)
       Dir.mktmpdir do |tmp_pkgdest|
         wrap_dir(:srcdest) do
           wrap_dir(:logdest) do
@@ -20,7 +20,7 @@ module Akabei
               PKGDEST: tmp_pkgdest.realpath,
               LOGDEST: logdest.realpath,
             }
-            @chroot_tree.makechrootpkg(dir.to_s, env)
+            chroot_tree.makechrootpkg(dir.to_s, env)
             tmp_pkgdest.each_child.map do |package_path|
               begin
                 dest = pkgdest.join(package_path.basename)
