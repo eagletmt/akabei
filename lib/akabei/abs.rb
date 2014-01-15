@@ -6,8 +6,9 @@ require 'tmpdir'
 
 module Akabei
   class Abs
-    def initialize(path, builder)
+    def initialize(path, repo_name, builder)
       @path = Pathname.new(path)
+      @repo_name = repo_name
       @builder = builder
     end
 
@@ -15,12 +16,14 @@ module Akabei
       @builder.with_source_package(dir) do |srcpkg|
         Dir.mktmpdir do |tree|
           tree = Pathname.new(tree)
+          root = tree.join(@repo_name)
+          root.mkpath
           if @path.readable?
-            ArchiveUtils.extract_all(@path, tree)
+            ArchiveUtils.extract_all(@path, root)
           end
           pkgname = detect_pkgname(srcpkg)
-          FileUtils.rm_rf(tree.join(pkgname).to_s)
-          ArchiveUtils.extract_all(srcpkg, tree)
+          FileUtils.rm_rf(root.join(pkgname).to_s)
+          ArchiveUtils.extract_all(srcpkg, root)
           FileUtils.rm_f(@path.to_s)
           ArchiveUtils.archive_all(tree, @path, Archive::COMPRESSION_GZIP, Archive::FORMAT_TAR)
         end

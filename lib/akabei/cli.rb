@@ -78,7 +78,7 @@ module Akabei
       files_path = repo_path.join("#{repo_name}.files")
       repo.load(db_path)
 
-      abs = Akabei::Abs.new(repo_path.join("#{repo_name}.abs.tar.gz"), builder)
+      abs = Akabei::Abs.new(repo_path.join("#{repo_name}.abs.tar.gz"), repo_name, builder)
 
       chroot.with_chroot do
         packages = builder.build_package(package_dir)
