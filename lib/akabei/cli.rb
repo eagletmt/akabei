@@ -13,8 +13,7 @@ module Akabei
     option :chroot_dir,
       desc: 'Path to chroot top',
       banner: 'DIR',
-      type: :string,
-      required: true
+      type: :string
     option :makepkg_config,
       desc: 'Path to makepkg.conf used in chroot',
       banner: 'FILE',
@@ -81,8 +80,7 @@ module Akabei
 
       abs = Akabei::Abs.new(repo_path.join("#{repo_name}.abs.tar.gz"), builder)
 
-      chroot.create
-      begin
+      chroot.with_chroot do
         packages = builder.build_package(package_dir)
         packages.each do |package|
           repo.add(package)
@@ -90,8 +88,6 @@ module Akabei
         abs.add(package_dir)
         repo.save(db_path, false)
         repo.save(files_path, true)
-      ensure
-        chroot.remove
       end
     end
   end

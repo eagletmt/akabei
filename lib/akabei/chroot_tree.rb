@@ -1,6 +1,7 @@
 require 'akabei/attr_path'
 require 'akabei/error'
 require 'pathname'
+require 'tmpdir'
 
 module Akabei
   class ChrootTree
@@ -16,20 +17,25 @@ module Akabei
     attr_path_accessor :makepkg_config, :pacman_config
 
     def initialize(root, arch)
-      @root = Pathname.new(root)
+      @root = root && Pathname.new(root)
       @arch = arch
     end
 
     BASE_PACKAGES = %w[base base-devel sudo]
 
-    def create
-      @root.mkpath
-      mkarchroot(*BASE_PACKAGES)
-    end
-
-    def remove
-      if @root.directory?
-        execute('rm', '-rf', @root.to_s)
+    def with_chroot(&block)
+      if @root
+        mkarchroot(*BASE_PACKAGES)
+        block.call
+      else
+        @root = Pathname.new(Dir.mktmpdir)
+        begin
+          mkarchroot(*BASE_PACKAGES)
+          block.call
+        ensure
+          execute('rm', '-rf', @root.to_s)
+          @root = nil
+        end
       end
     end
 
