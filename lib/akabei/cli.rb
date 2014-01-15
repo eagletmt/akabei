@@ -62,8 +62,10 @@ module Akabei
         chroot.pacman_config = options[:pacman_config]
       end
 
-      repo = Akabei::Repository.new
-      repo.signer = options[:repository_key] && Akabei::Signer.new(options[:repository_key])
+      repo_db = Akabei::Repository.new
+      repo_db.signer = options[:repository_key] && Akabei::Signer.new(options[:repository_key])
+      repo_files = Akabei::Repository.new
+      repo_files.include_files = true
 
       builder = Akabei::Builder.new
       builder.signer = options[:package_key] && Akabei::Signer.new(options[:package_key])
@@ -76,18 +78,20 @@ module Akabei
 
       db_path = repo_path.join("#{repo_name}.db")
       files_path = repo_path.join("#{repo_name}.files")
-      repo.load(db_path)
+      repo_db.load(db_path)
+      repo_files.load(files_path)
 
       abs = Akabei::Abs.new(repo_path.join("#{repo_name}.abs.tar.gz"), repo_name, builder)
 
       chroot.with_chroot do
         packages = builder.build_package(package_dir, chroot)
         packages.each do |package|
-          repo.add(package)
+          repo_db.add(package)
+          repo_files.add(package)
         end
         abs.add(package_dir)
-        repo.save(db_path, false)
-        repo.save(files_path, true)
+        repo_db.save(db_path)
+        repo_files.save(files_path)
       end
     end
 

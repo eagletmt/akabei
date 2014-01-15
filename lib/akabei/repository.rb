@@ -7,10 +7,11 @@ require 'tmpdir'
 
 module Akabei
   class Repository
-    attr_accessor :signer
+    attr_accessor :signer, :include_files
 
     def initialize
       @db = {}
+      @include_files = false
     end
 
     extend Forwardable
@@ -82,11 +83,11 @@ module Akabei
       end
     end
 
-    def save(path, include_files)
+    def save(path)
       Archive::Writer.open_filename(path.to_s, Archive::COMPRESSION_GZIP, Archive::FORMAT_TAR) do |archive|
         Dir.mktmpdir do |dir|
           dir = Pathname.new(dir)
-          store_tree(dir, include_files)
+          store_tree(dir)
           create_db(dir, archive)
         end
       end
@@ -96,7 +97,7 @@ module Akabei
       nil
     end
 
-    def store_tree(topdir, include_files)
+    def store_tree(topdir)
       @db.each do |db_name, pkg_entry|
         pkgdir = topdir.join(db_name)
         pkgdir.mkpath
@@ -106,7 +107,7 @@ module Akabei
         pkgdir.join('depends').open('w') do |f|
           pkg_entry.write_depends(f)
         end
-        if include_files
+        if @include_files
           pkgdir.join('files').open('w') do |f|
             pkg_entry.write_files(f)
           end
