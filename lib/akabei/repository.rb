@@ -26,6 +26,13 @@ module Akabei
       end
     end
 
+    def ==(other)
+      other.is_a?(self.class) &&
+        signer == other.signer &&
+        include_files == other.include_files &&
+        @db == other.instance_variable_get(:@db)
+    end
+
     def load(path)
       path = Pathname.new(path)
       return unless path.readable?

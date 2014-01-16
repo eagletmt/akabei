@@ -119,7 +119,7 @@ describe Akabei::Repository do
       repo.save(dest_path)
       expect(dest_path).to be_readable
       new_repo = described_class.load(dest_path)
-      expect(repo.to_h).to eq(new_repo.to_h)
+      expect(repo).to eq(new_repo)
     end
 
     context 'with signer' do
@@ -149,7 +149,8 @@ describe Akabei::Repository do
       it 'stores repository database' do
         repo.save(dest_path)
         new_repo = described_class.load(dest_path)
-        expect(repo.to_h).to eq(new_repo.to_h)
+        new_repo.include_files = true
+        expect(repo).to eq(new_repo)
       end
     end
   end
