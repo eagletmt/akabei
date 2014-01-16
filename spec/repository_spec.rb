@@ -130,10 +130,9 @@ describe Akabei::Repository do
       end
 
       it 'stores repository database and sign it' do
-        allow(signer).to receive(:detach_sign) do |path|
+        expect(signer).to receive(:detach_sign).once.with(dest_path) { |path|
           File.open("#{path}.sig", 'w') {}
-        end
-        expect(signer).to receive(:detach_sign).once.with(dest_path)
+        }
 
         repo.save(dest_path)
         expect(Pathname.new("#{dest_path}.sig")).to be_readable
