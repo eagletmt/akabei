@@ -6,6 +6,12 @@
 # See http://rubydoc.info/gems/rspec-core/RSpec/Core/Configuration
 
 require 'pathname'
+require 'simplecov'
+
+SimpleCov.start do
+  add_filter Bundler.bundle_path.to_s
+  add_filter File.dirname(__FILE__)
+end
 
 module TestData
   ROOT = Pathname.new(__FILE__).parent.join('data')
