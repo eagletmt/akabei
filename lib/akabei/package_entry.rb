@@ -59,6 +59,12 @@ module Akabei
       end
     end
 
+    def ==(other)
+      (ARRAY_ATTRIBUTES + DESC_ATTRIBUTES).all? do |attr|
+        public_send(attr) == other.public_send(attr)
+      end
+    end
+
     def write_desc(io)
       ARRAY_DESC_ATTRIBUTES.each do |attr|
         write_array(io, attr)
