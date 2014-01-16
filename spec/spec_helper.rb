@@ -18,7 +18,7 @@ SimpleCov.start do
   add_filter File.dirname(__FILE__)
 end
 
-module TestData
+module TestDataHelpers
   ROOT = Pathname.new(__FILE__).parent.join('data')
   INPUT_ROOT = ROOT.join('input')
   DEST_ROOT = ROOT.join('dest')
@@ -40,6 +40,30 @@ module TestData
   end
 end
 
+module OutputHelpers
+  def capture_stdout(&block)
+    orig = $stdout
+    stdout = StringIO.new
+    $stdout = stdout
+    block.call
+    stdout.string
+  ensure
+    $stdout = orig
+  end
+end
+
+module TarHelpers
+  def tar(*args)
+    cmd = ['tar'] + args
+    out, status = Open3.capture2(*cmd)
+    if status.success?
+      out.each_line.map(&:chomp)
+    else
+      raise "capture2 failed: #{status}: #{cmd.join(' ')}"
+    end
+  end
+end
+
 RSpec.configure do |config|
   # Limit the spec run to only specs with the focus metadata. If no specs have
   # the filtering metadata and `run_all_when_everything_filtered = true` then
@@ -57,11 +81,14 @@ RSpec.configure do |config|
   #     --seed 1234
   #config.order = 'random'
 
-  config.include TestData
+  config.include TestDataHelpers
   config.before(:each) do
-    TestData.prepare_dest
+    TestDataHelpers.prepare_dest
   end
   config.after(:each) do
-    TestData.clean_dest
+    TestDataHelpers.clean_dest
   end
+
+  config.include OutputHelpers
+  config.include TarHelpers
 end

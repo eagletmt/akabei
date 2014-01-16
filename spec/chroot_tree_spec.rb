@@ -64,16 +64,6 @@ describe Akabei::ChrootTree do
     let(:command) { %w[rm -rf /] }
     let(:opts) { { chdir: '/' } }
 
-    def capture_stdout(&block)
-      orig = $stdout
-      stdout = StringIO.new
-      $stdout = stdout
-      block.call
-      stdout.string
-    ensure
-      $stdout = orig
-    end
-
     it 'calls sudo and setarch' do
       expect(chroot).to receive(:system).once.with(any_args) { |*args|
         expect(args).to eq(%W[sudo setarch #{arch}] + command + [opts])

@@ -5,16 +5,6 @@ require 'open3'
 describe Akabei::ArchiveUtils do
   let(:archive_path) { test_input('htop-vi.tar.gz') }
 
-  def tar(*args)
-    cmd = ['tar'] + args
-    out, status = Open3.capture2(*cmd)
-    if status.success?
-      out.each_line.map(&:chomp)
-    else
-      raise "capture2 failed: #{status}: #{cmd.join(' ')}"
-    end
-  end
-
   def list_tree(dir)
     Akabei::ArchiveUtils.list_tree_paths(dir).map { |path| path.relative_path_from(dir).to_s }
   end
