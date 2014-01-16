@@ -52,6 +52,7 @@ module OutputHelpers
   end
 end
 
+require 'open3'
 module TarHelpers
   def tar(*args)
     cmd = ['tar'] + args

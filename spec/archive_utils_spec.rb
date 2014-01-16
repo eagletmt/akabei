@@ -1,6 +1,5 @@
 require 'spec_helper'
 require 'akabei/archive_utils'
-require 'open3'
 
 describe Akabei::ArchiveUtils do
   let(:archive_path) { test_input('htop-vi.tar.gz') }
