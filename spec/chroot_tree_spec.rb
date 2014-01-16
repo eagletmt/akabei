@@ -96,10 +96,12 @@ describe Akabei::ChrootTree do
           expect(args).to eq(%W[sudo setarch #{arch} env #{key}=#{value}] + command + [expected_opts])
         }.and_return(true)
 
+        opts.merge!(env: { key => value })
         stdout = capture_stdout do
-          chroot.execute(*command, opts.merge(env: { key => value }))
+          chroot.execute(*command, opts)
         end
         expect(stdout).to include('rm -rf /')
+        expect(opts).to have_key(:env)
       end
 
       context 'with command failure' do

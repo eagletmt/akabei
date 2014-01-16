@@ -62,11 +62,13 @@ module Akabei
       if args.last.is_a?(Hash)
         opts = args.last
         if opts.has_key?(:env)
+          opts = opts.dup
           env = opts.delete(:env)
           env.each do |k, v|
             args.unshift("#{k}=#{v}")
           end
           args.unshift('env')
+          args[-1] = opts
         end
       end
 
