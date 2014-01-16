@@ -1,6 +1,7 @@
 # Akabei
 [![Build Status](https://secure.travis-ci.org/eagletmt/akabei.png)](https://travis-ci.org/eagletmt/akabei)
 [![Code Climate](https://codeclimate.com/github/eagletmt/akabei.png)](https://codeclimate.com/github/eagletmt/akabei)
+[![Coverage Status](https://coveralls.io/repos/eagletmt/akabei/badge.png)](https://coveralls.io/r/eagletmt/akabei)
 
 Custom repository manager for ArchLinux pacman.
 
