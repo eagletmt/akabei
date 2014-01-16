@@ -5,9 +5,14 @@
 #
 # See http://rubydoc.info/gems/rspec-core/RSpec/Core/Configuration
 
+require 'coveralls'
 require 'pathname'
 require 'simplecov'
 
+SimpleCov.formatter = SimpleCov::Formatter::MultiFormatter[
+  SimpleCov::Formatter::HTMLFormatter,
+  Coveralls::SimpleCov::Formatter,
+]
 SimpleCov.start do
   add_filter Bundler.bundle_path.to_s
   add_filter File.dirname(__FILE__)
