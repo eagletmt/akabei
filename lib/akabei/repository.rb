@@ -18,6 +18,14 @@ module Akabei
     include Enumerable
     def_delegator(:@db, :each)
 
+    def [](package_name)
+      @db.each do |_, entry|
+        if entry.name == package_name
+          return entry
+        end
+      end
+    end
+
     def load(path)
       path = Pathname.new(path)
       return unless path.readable?
