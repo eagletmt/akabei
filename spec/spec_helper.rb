@@ -50,6 +50,16 @@ module OutputHelpers
   ensure
     $stdout = orig
   end
+
+  def capture_stderr(&block)
+    orig = $stdout
+    stderr = StringIO.new
+    $stderr = stderr
+    block.call
+    stderr.string
+  ensure
+    $stderr = orig
+  end
 end
 
 require 'open3'
