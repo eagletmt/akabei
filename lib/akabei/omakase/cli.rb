@@ -97,7 +97,11 @@ module Akabei
       private
 
       def config
-        @config ||= Config.load
+        @config ||= begin
+          c = Config.load
+          c.validate!
+          c
+        end
       end
     end
   end
