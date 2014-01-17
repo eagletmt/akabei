@@ -27,7 +27,7 @@ Basic usage: build foo x86_64 package for bar repository.
 % ls foo
 PKGBUILD
 % mkdir -p repo/x86_64
-% akabei build foo --repository-dir repo/x86_64 --repository-name bar --arch x86_64
+% akabei build foo --repo-dir repo/x86_64 --repo-name bar --arch x86_64
 (snip)
 % ls repo/x86_64
 bar.abs.tar.gz  bar.db  bar.files  foo-1.0.0-1-x86_64.pkg.tar.xz
@@ -36,7 +36,7 @@ bar.abs.tar.gz  bar.db  bar.files  foo-1.0.0-1-x86_64.pkg.tar.xz
 With full options:
 ```
 % [ -z $GPG_AGENT_INFO ] && eval `gpg-agent --daemon`
-% akabei build foo --chroot-dir /var/cache/akabei/chroot-x86_64 --repository-dir repo/x86_64 --repository-name bar --arch x86_64 --package-key $GPGKEY --repository-key $GPGKEY --pacman-config pacman.x86_64.conf --makepkg-config makepkg.x86_64.conf --srcdest sources --logdest logs
+% akabei build foo --chroot-dir /var/cache/akabei/chroot-x86_64 --repo-dir repo/x86_64 --repo-name bar --arch x86_64 --package-key $GPGKEY --repo-key $GPGKEY --pacman-config pacman.x86_64.conf --makepkg-config makepkg.x86_64.conf --srcdest sources --logdest logs
 (snip)
 % ls repo/x86_64
 bar.abs.tar.gz  bar.db  bar.db.sig  bar.files  bar.files.sig  foo-1.0.0-1-x86_64.pkg.tar.xz  foo-1.0.0-1-x86_64.pkg.tar.xz.sig

@@ -12,12 +12,12 @@ module Akabei
   class CLI < Thor
     module CommonOptions
       COMMON_OPTIONS = {
-        repository_key: {
+        repo_key: {
           desc: 'GPG key to sign repository database',
           banner: 'GPGKEY',
           type: :string
         },
-        repository_name: {
+        repo_name: {
           desc: 'Name of the repository',
           banner: 'NAME',
           type: :string,
@@ -62,7 +62,7 @@ module Akabei
       desc: 'Path to the directory to store logs',
       banner: 'FILE',
       type: :string
-    option :repository_dir,
+    option :repo_dir,
       desc: 'Path to the repository',
       banner: 'DIR',
       type: :string,
@@ -72,7 +72,7 @@ module Akabei
       banner: 'ARCH',
       enum: %w[i686 x86_64],
       required: true
-    common_options :repository_name, :repository_key, :srcdest
+    common_options :repo_name, :repo_key, :srcdest
     def build(package_dir)
       chroot = ChrootTree.new(options[:chroot_dir], options[:arch])
       if options[:makepkg_config]
@@ -83,7 +83,7 @@ module Akabei
       end
 
       repo_db = Repository.new
-      repo_db.signer = options[:repository_key] && Signer.new(options[:repository_key])
+      repo_db.signer = options[:repo_key] && Signer.new(options[:repo_key])
       repo_files = Repository.new
       repo_files.include_files = true
 
@@ -92,8 +92,8 @@ module Akabei
       builder.srcdest = options[:srcdest]
       builder.logdest = options[:logdest]
 
-      repo_path = Pathname.new(options[:repository_dir])
-      repo_name = options[:repository_name]
+      repo_path = Pathname.new(options[:repo_dir])
+      repo_name = options[:repo_name]
       builder.pkgdest = repo_path
 
       db_path = repo_path.join("#{repo_name}.db")
@@ -116,36 +116,36 @@ module Akabei
     end
 
     desc 'abs-add DIR ABS_TARBALL', 'Add the package inside DIR to ABS_TARBALL'
-    common_options :repository_name, :srcdest
+    common_options :repo_name, :srcdest
     def abs_add(package_dir, abs_path)
       builder = Builder.new
       builder.srcdest = options[:srcdest]
-      abs = Abs.new(abs_path, options[:repository_name])
+      abs = Abs.new(abs_path, options[:repo_name])
       abs.add(package_dir, builder)
     end
 
     desc 'abs-remove PKG_NAME ABS_TARBALL', 'Remove PKG_NAME from ABS_TARBALL'
-    common_options :repository_name
+    common_options :repo_name
     def abs_remove(package_name, abs_path)
-      abs = Abs.new(abs_path, options[:repository_name])
+      abs = Abs.new(abs_path, options[:repo_name])
       abs.remove(package_name)
     end
 
     desc 'repo-add PACKAGE_PATH REPOSITORY_DB', 'Add PACKAGE_PATH to REPOSITORY_DB'
-    common_options :repository_key
+    common_options :repo_key
     def repo_add(package_path, db_path)
       repo = Repository.new
-      repo.signer = options[:repository_key] && Signer.new(options[:repository_key])
+      repo.signer = options[:repo_key] && Signer.new(options[:repo_key])
       repo.load(db_path)
       repo.add(Package.new(package_path))
       repo.save(db_path)
     end
 
     desc 'repo-remove PACKAGE_NAME REPOSITORY_DB', 'Remove PACKAGE_NAME from REPOSITORY_DB'
-    common_options :repository_key
+    common_options :repo_key
     def repo_remove(package_name, db_path)
       repo = Repository.new
-      repo.signer = options[:repository_key] && Signer.new(options[:repository_key])
+      repo.signer = options[:repo_key] && Signer.new(options[:repo_key])
       repo.load(db_path)
       repo.remove(package_name)
       repo.save(db_path)
