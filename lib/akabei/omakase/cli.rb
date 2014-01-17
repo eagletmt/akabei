@@ -8,6 +8,8 @@ module Akabei
       namespace :omakase
 
       include Thor::Actions
+      include Thor::Shell
+
       def self.source_root
         File.expand_path('../templates', __FILE__)
       end
@@ -46,6 +48,8 @@ module Akabei
           copy_file("makepkg.#{arch}.conf", "etc/makepkg.#{arch}.conf")
           copy_file("pacman.#{arch}.conf", "etc/pacman.#{arch}.conf")
         end
+
+        say('Edit etc/makepkg.*.conf and set PACKAGER first!', :green)
       end
 
       desc 'build PACKAGE_NAME', "build PACKAGE_NAME"

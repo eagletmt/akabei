@@ -65,6 +65,9 @@ Omakase mode supports a typical situation managing the custom repository.
       create  etc/pacman.i686.conf
       create  etc/makepkg.x86_64.conf
       create  etc/pacman.x86_64.conf
+Edit etc/makepkg.*.conf and set PACKAGER first!
+% echo 'PACKAGER="John Doe <john@doe.com>"' >> etc/makepkg.i686.conf
+% echo 'PACKAGER="John Doe <john@doe.com>"' >> etc/makepkg.x86_64.conf
 ```
 
 ### Build a package
