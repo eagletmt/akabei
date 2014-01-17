@@ -2,32 +2,32 @@ require 'akabei/error'
 
 module Akabei
   class PackageInfo
+    # See write_pkginfo() in /usr/bin/makepkg
     ARRAY_ATTRIBUTES = %w[
-      checkdepend
-      conflict
-      depend
-      group
       license
-      makedepend
-      makepkgopt
-      optdepend
-      pkgbase
-      provides
       replaces
+      group
+      conflict
+      provides
+      backup
+      depend
+      optdepend
+      makedepend
+      checkdepend
+
+      makepkgopt
     ].freeze
 
     ATTRIBUTES = %w[
-      arch
-      builddate
-      csize
-      md5sum
-      packager
-      pkgdesc
       pkgname
+      pkgbase
       pkgver
-      sha256sum
-      size
+      pkgdesc
       url
+      builddate
+      packager
+      size
+      arch
     ].freeze
 
     attr_accessor *ARRAY_ATTRIBUTES
