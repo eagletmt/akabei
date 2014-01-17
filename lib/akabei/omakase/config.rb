@@ -60,6 +60,22 @@ module Akabei
         end
         true
       end
+
+      def repo_path(arch)
+        Pathname.new(@config['name']).join('os', arch)
+      end
+
+      def db_path(arch)
+        repo_path(arch).join("#{@config['name']}.db")
+      end
+
+      def files_path(arch)
+        repo_path(arch).join("#{@config['name']}.files")
+      end
+
+      def abs_path(arch)
+        repo_path(arch).join("#{@config['name']}.abs.tar.gz")
+      end
     end
   end
 end

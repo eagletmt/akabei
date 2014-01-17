@@ -70,15 +70,16 @@ module Akabei
           repo_files = Repository.new
           repo_files.include_files = true
 
-          repo_path = Pathname.new(config['name']).join('os', arch)
+          repo_path = config.repo_path(arch)
           repo_path.mkpath
           builder.pkgdest = repo_path
 
-          db_path = repo_path.join("#{config['name']}.db")
-          files_path = repo_path.join("#{config['name']}.files")
+          db_path = config.db_path(arch)
+          files_path = config.files_path(arch)
+          abs = Abs.new(config.abs_path(arch), config['name'])
+
           repo_db.load(db_path)
           repo_files.load(files_path)
-          abs = Abs.new(repo_path.join("#{config['name']}.abs.tar.gz"), config['name'])
 
           package_dir = Pathname.new(config['pkgbuild']).join(package_name)
           chroot.with_chroot do
