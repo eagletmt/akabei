@@ -75,16 +75,20 @@ module TarHelpers
   end
 end
 
-RSpec.configure do |config|
-  # Limit the spec run to only specs with the focus metadata. If no specs have
-  # the filtering metadata and `run_all_when_everything_filtered = true` then
-  # all specs will run.
-  #config.filter_run :focus
+module IntegrationSpecHelper
+  def akabei(*cmd)
+    system(File.expand_path('../../bin/akabei', __FILE__), *cmd)
+  end
+end
 
-  # Run all specs when none match the provided filter. This works well in
-  # conjunction with `config.filter_run :focus`, as it will run the entire
-  # suite when no specs have `:filter` metadata.
-  #config.run_all_when_everything_filtered = true
+RSpec.configure do |config|
+  config.filter_run :focus
+  if ENV['AKABEI_ARCH_SPEC']
+    config.filter_run_including :archlinux
+  else
+    config.filter_run_excluding :archlinux
+  end
+  config.run_all_when_everything_filtered = true
 
   # Run specs in random order to surface order dependencies. If you find an
   # order dependency and want to debug it, you can fix the order by providing
@@ -102,4 +106,5 @@ RSpec.configure do |config|
 
   config.include OutputHelpers
   config.include TarHelpers
+  config.include IntegrationSpecHelper
 end
