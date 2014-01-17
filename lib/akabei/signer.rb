@@ -36,9 +36,9 @@ module Akabei
       end
     end
 
-    def initialize(gpg_key)
+    def initialize(gpg_key, crypto = GPGME::Crypto.new)
       @gpg_key = find_secret_key(gpg_key)
-      @crypto = GPGME::Crypto.new
+      @crypto = crypto
     end
 
     def detach_sign(path)
