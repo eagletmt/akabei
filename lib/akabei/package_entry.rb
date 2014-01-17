@@ -82,8 +82,8 @@ module Akabei
     end
 
     def write_files(io)
-      ARRAY_FILES_ATTRIBUTES.each do |attr|
-        write_array(io, attr)
+      unless write_array(io, 'files')
+        warn 'WARNING: files attribute is empty.'
       end
     end
 
@@ -104,6 +104,7 @@ module Akabei
       io.puts "%#{attr.upcase}%"
       io.puts val
       io.puts
+      true
     end
   end
 end
