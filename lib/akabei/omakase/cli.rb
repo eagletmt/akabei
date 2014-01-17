@@ -1,5 +1,6 @@
 require 'akabei/cli'
 require 'akabei/omakase/config'
+require 'akabei/omakase/s3'
 require 'thor'
 
 module Akabei
@@ -14,8 +15,8 @@ module Akabei
         File.expand_path('../templates', __FILE__)
       end
 
-      def self.banner(task, namespace, subcommand)
-        super(task, false, true)
+      def self.banner(task, namespace = nil, subcommand = false)
+        super(task, nil, true)
       end
 
       desc 'init NAME', "Generate omakase template for NAME repository"
@@ -27,6 +28,10 @@ module Akabei
         desc: 'GPG key to sign repository database',
         banner: 'GPGKEY',
         type: :string
+      option :s3,
+        desc: 'Enable S3 repository',
+        type: :boolean,
+        default: false
       def init(name)
         # Check key's validity
         if options[:repo_key]
@@ -34,6 +39,15 @@ module Akabei
         end
         if options[:package_key]
           Signer.new(options[:package_key])
+        end
+
+        if options[:s3]
+          begin
+            require 'aws-sdk'
+          rescue LoadError => e
+            say("WARNING: You don't have aws-sdk installed. Disable S3 repository.", :yellow)
+            options[:s3] = false
+          end
         end
 
         @name = name
@@ -60,6 +74,8 @@ module Akabei
         builder.logdest = config['logdest']
         repo_signer = config['repo_key'] && Signer.new(config['repo_key'])
 
+        s3 = S3.new(config['s3'], shell)
+
         config['builds'].each do |arch, config_file|
           chroot = ChrootTree.new(nil, arch)
           chroot.makepkg_config = config_file['makepkg']
@@ -78,6 +94,7 @@ module Akabei
           files_path = config.files_path(arch)
           abs = Abs.new(config.abs_path(arch), config['name'])
 
+          s3.before!(config, arch)
           repo_db.load(db_path)
           repo_files.load(files_path)
 
@@ -91,6 +108,7 @@ module Akabei
             abs.add(package_dir, builder)
             repo_db.save(db_path)
             repo_files.save(files_path)
+            s3.after!(config, arch, packages)
           end
         end
       end

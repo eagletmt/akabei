@@ -11,3 +11,10 @@ builds:
     makepkg: etc/makepkg.<%= arch %>.conf
     pacman: etc/pacman.<%= arch %>.conf
 <%- end -%>
+s3:
+<%- if options[:s3] -%>
+  access_key_id:
+  secret_access_key:
+  bucket:
+  region:
+<%- end -%>

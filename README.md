@@ -113,6 +113,16 @@ SigLevel = Required
 Server = http://example.com/$repo/os/$arch
 ```
 
+### Publish the repository (Amazon S3)
+Initialize repository with `--s3` option and set your credentials to .akabei.yml.
+aws-sdk gem is required.
+
+Each time you execute `akabei omakase build`:
+
+1. Download repository databases (not including packages)
+2. Build a package
+3. Upload the built package and repository databases.
+
 ## Contributing
 
 1. Fork it ( https://github.com/eagletmt/akabei/fork )
