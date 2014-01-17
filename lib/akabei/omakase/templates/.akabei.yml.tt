@@ -1,0 +1,13 @@
+---
+name: <%= @name %>
+package_key: <%= options[:package_key] %>
+repo_key: <%= options[:repo_key] %>
+srcdest: sources
+logdest: logs
+pkgbuild: PKGBUILDs
+builds:
+<%- @archs.each do |arch| -%>
+  <%= arch %>:
+    makepkg: etc/makepkg.<%= arch %>.conf
+    pacman: etc/pacman.<%= arch %>.conf
+<%- end -%>

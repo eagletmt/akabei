@@ -47,6 +47,69 @@ foo-1.0.0.tar.gz
 foo-1.0.0-1-x86_64-build.log  foo-1.0.0-1-x86_64-package.log
 ```
 
+## Omakase mode
+Omakase mode supports a typical situation managing the custom repository.
+
+### Initialize a repository
+`--repo-key` and `--package-key` are optional.
+
+```
+% akabei omakase init foo --repo-key $GPGKEY --package-key $GPGKEY
+      create  .akabei.yml
+      create  foo
+      create  sources
+      create  logs
+      create  PKGBUILDs
+      create  etc
+      create  etc/makepkg.i686.conf
+      create  etc/pacman.i686.conf
+      create  etc/makepkg.x86_64.conf
+      create  etc/pacman.x86_64.conf
+```
+
+### Build a package
+Write a PKGBUILD in `PKGBUILDs/#{pkgname}` directory.
+
+```
+% mkdir PKGBUILDs/bar
+% vim PKGBUILDs/bar/PKGBUILD
+```
+
+Then build the package.
+
+```
+% akabei omakase build bar
+(snip)
+% tree foo
+foo
+`-- os
+    |-- i686
+    |   |-- bar-1.0.0-1-i686.pkg.tar.xz
+    |   |-- bar-1.0.0-1-i686.pkg.tar.xz.sig
+    |   |-- foo.abs.tar.gz
+    |   |-- foo.db
+    |   |-- foo.db.sig
+    |   `-- foo.files
+    `-- x86_64
+        |-- bar-1.0.0-1-x86_64.pkg.tar.xz
+        |-- bar-1.0.0-1-x86_64.pkg.tar.xz.sig
+        |-- foo.abs.tar.gz
+        |-- foo.db
+        |-- foo.db.sig
+        `-- foo.files
+```
+
+### Publish the repository
+For the server, serve files under the foo directory by HTTP server like nginx or Apache.
+
+For clients, add the server's repository configuration to /etc/pacman.conf like below.
+
+```
+[foo]
+SigLevel = Required
+Server = http://example.com/$repo/os/$arch
+```
+
 ## Contributing
 
 1. Fork it ( https://github.com/eagletmt/akabei/fork )

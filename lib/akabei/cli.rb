@@ -1,6 +1,7 @@
 require 'akabei/abs'
 require 'akabei/builder'
 require 'akabei/chroot_tree'
+require 'akabei/omakase/cli'
 require 'akabei/package'
 require 'akabei/repository'
 require 'akabei/signer'
@@ -168,5 +169,7 @@ module Akabei
       repo.remove(package_name)
       repo.save(db_path)
     end
+
+    Akabei::CLI.register(Akabei::Omakase::CLI, 'omakase', 'omakase <command>', 'Omakase mode')
   end
 end
