@@ -71,7 +71,7 @@ describe Akabei::Omakase::CLI do
 
   describe '#build' do
     let(:config) { Akabei::Omakase::Config.load }
-    let(:package) { double('built package') }
+    let(:packages) { { 'i686' => double('built package (i686)'), 'x86_64' => double('built package (x86_64)') } }
     let(:entry) { Akabei::PackageEntry.new }
     let(:init_opts) { {} }
 
@@ -79,24 +79,74 @@ describe Akabei::Omakase::CLI do
       cli.invoke(:init, ['test'], init_opts)
       tar('xf', test_input('nkf.tar.gz').to_s, '-C', config.pkgbuild.to_s)
 
-      allow(package).to receive(:db_name).and_return('nkf-2.1.3-1')
-      allow(package).to receive(:to_entry).and_return(entry)
+      packages.each do |arch, package|
+        allow(package).to receive(:db_name).and_return('nkf-2.1.3-1')
+        allow(package).to receive(:to_entry).and_return(entry)
+        allow(package).to receive(:path).and_return(Pathname.new("test/os/#{arch}/nkf-2.1.3-1-#{arch}.pkg.tar.xz"))
+      end
       entry.add('files', 'usr/bin/nkf')
-    end
 
-    it 'builds a package and add it to repository' do
       allow_any_instance_of(Akabei::ChrootTree).to receive(:with_chroot) { |chroot, &block|
         expect(chroot.makepkg_config.to_s).to eq("etc/makepkg.#{chroot.arch}.conf")
         expect(chroot.pacman_config.to_s).to eq("etc/pacman.#{chroot.arch}.conf")
         block.call
       }
       expect(config['builds'].size).to eq(2)
+
       expect_any_instance_of(Akabei::Builder).to receive(:build_package).twice { |builder, dir, chroot|
         expect(builder).to receive(:with_source_package).with(config.package_dir('nkf')).and_yield(test_input('nkf.tar.gz'))
-        [package]
+        [packages[chroot.arch]]
       }
+    end
 
+    it 'builds a package and add it to repository' do
       cli.invoke(:build, ['nkf'])
+    end
+
+    context 'with --s3' do
+      let(:init_opts) { { s3: true } }
+      let(:access_key_id) { 'ACCESS/KEY' }
+      let(:secret_access_key) { 'SECRET/ACCESS/KEY' }
+      let(:bucket_name) { 'test.bucket.name' }
+      let(:region) { 'ap-northeast-1' }
+
+      let(:buckets) { double('S3::BucketCollection') }
+      let(:bucket) { double('S3::Bucket') }
+      let(:objects) { double('S3::ObjectCollection') }
+
+      before do
+        c = SafeYAML.load_file('.akabei.yml')
+        c['s3']['access_key_id'] = access_key_id
+        c['s3']['secret_access_key'] = secret_access_key
+        c['s3']['bucket'] = bucket_name
+        c['s3']['region'] = region
+        open('.akabei.yml', 'w') { |f| YAML.dump(c, f) }
+
+        allow_any_instance_of(AWS::S3).to receive(:buckets).and_return(buckets)
+      end
+
+      it 'uploads built packages and update repositories' do
+        expect(buckets).to receive(:[]).with(bucket_name).and_return(bucket)
+        allow(bucket).to receive(:objects).and_return(objects)
+
+        %w[i686 x86_64].each do |arch|
+          %w[test.db test.files test.abs.tar.gz].each do |fname|
+            obj = double("S3::Object #{fname}")
+            # download and upload
+            expect(objects).to receive(:[]).with("test/os/#{arch}/#{fname}").twice.and_return(obj)
+            expect(obj).to receive(:read).and_yield('')
+            expect(obj).to receive(:write)
+          end
+
+          # upload only
+          pkg = double("S3::Object built package (#{arch})")
+          db_name = "nkf-2.1.3-1-#{arch}.pkg.tar.xz"
+          expect(objects).to receive(:[]).with("test/os/#{arch}/#{db_name}").and_return(pkg)
+          expect(pkg).to receive(:write)
+        end
+
+        cli.invoke(:build, ['nkf'])
+      end
     end
   end
 end
