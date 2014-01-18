@@ -79,11 +79,6 @@ module Akabei
       chroot.makepkg_config = options[:makepkg_config]
       chroot.pacman_config = options[:pacman_config]
 
-      repo_db = Repository.new
-      repo_db.signer = Signer.get(options[:repo_key])
-      repo_files = Repository.new
-      repo_files.include_files = true
-
       builder = Builder.new
       builder.signer = Signer.get(options[:package_key])
       builder.srcdest = options[:srcdest]
@@ -95,8 +90,8 @@ module Akabei
 
       db_path = repo_path.join("#{repo_name}.db")
       files_path = repo_path.join("#{repo_name}.files")
-      repo_db.load(db_path)
-      repo_files.load(files_path)
+      repo_db = Repository.load(db_path, signer: Signer.get(options[:repo_key]))
+      repo_files = Repository.load(files_path, include_files: true)
 
       abs = Abs.new(repo_path.join("#{repo_name}.abs.tar.gz"), repo_name)
 

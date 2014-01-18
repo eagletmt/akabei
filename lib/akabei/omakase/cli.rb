@@ -81,11 +81,6 @@ module Akabei
           chroot.makepkg_config = config_file['makepkg']
           chroot.pacman_config = config_file['pacman']
 
-          repo_db = Repository.new
-          repo_db.signer = repo_signer
-          repo_files = Repository.new
-          repo_files.include_files = true
-
           repo_path = config.repo_path(arch)
           repo_path.mkpath
           builder.pkgdest = repo_path
@@ -95,8 +90,8 @@ module Akabei
           abs = Abs.new(config.abs_path(arch), config.name)
 
           s3.before!(config, arch)
-          repo_db.load(db_path)
-          repo_files.load(files_path)
+          repo_db = Repository.load(db_path, signer: repo_signer)
+          repo_files = Repository.load(files_path, include_files: true)
 
           package_dir = config.package_dir(package_name)
           chroot.with_chroot do

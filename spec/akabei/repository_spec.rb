@@ -148,8 +148,7 @@ describe Akabei::Repository do
 
       it 'stores repository database' do
         repo.save(dest_path)
-        new_repo = described_class.load(dest_path)
-        new_repo.include_files = true
+        new_repo = described_class.load(dest_path, include_files: true)
         expect(repo).to eq(new_repo)
       end
     end

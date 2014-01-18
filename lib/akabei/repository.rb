@@ -9,9 +9,10 @@ module Akabei
   class Repository
     attr_accessor :signer, :include_files
 
-    def initialize
+    def initialize(opts = {})
       @db = {}
-      @include_files = false
+      @include_files = opts[:include_files] || false
+      @signer = opts[:signer]
     end
 
     extend Forwardable
@@ -55,8 +56,8 @@ module Akabei
       nil
     end
 
-    def self.load(path)
-      new.tap do |repo|
+    def self.load(path, opts = {})
+      new(opts).tap do |repo|
         repo.load(path)
       end
     end
