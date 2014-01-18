@@ -69,14 +69,14 @@ module Akabei
       desc 'build PACKAGE_NAME', "build PACKAGE_NAME"
       def build(package_name)
         builder = Builder.new
-        builder.signer = config['package_key'] && Signer.new(config['package_key'])
-        builder.srcdest = config['srcdest']
-        builder.logdest = config['logdest']
-        repo_signer = config['repo_key'] && Signer.new(config['repo_key'])
+        builder.signer = config.package_signer
+        builder.srcdest = config.srcdest
+        builder.logdest = config.logdest
+        repo_signer = config.repo_signer
 
         s3 = S3.new(config['s3'], shell)
 
-        config['builds'].each do |arch, config_file|
+        config.builds.each do |arch, config_file|
           chroot = ChrootTree.new(nil, arch)
           chroot.makepkg_config = config_file['makepkg']
           chroot.pacman_config = config_file['pacman']
@@ -92,13 +92,13 @@ module Akabei
 
           db_path = config.db_path(arch)
           files_path = config.files_path(arch)
-          abs = Abs.new(config.abs_path(arch), config['name'])
+          abs = Abs.new(config.abs_path(arch), config.name)
 
           s3.before!(config, arch)
           repo_db.load(db_path)
           repo_files.load(files_path)
 
-          package_dir = Pathname.new(config['pkgbuild']).join(package_name)
+          package_dir = config.package_dir(package_name)
           chroot.with_chroot do
             packages = builder.build_package(package_dir, chroot)
             packages.each do |package|

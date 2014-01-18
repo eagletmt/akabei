@@ -1,4 +1,5 @@
 require 'akabei/error'
+require 'akabei/signer'
 require 'forwardable'
 require 'safe_yaml/load'
 
@@ -58,6 +59,38 @@ module Akabei
           end
         end
         true
+      end
+
+      def name
+        @config['name']
+      end
+
+      def srcdest
+        Pathname.new(@config['srcdest'])
+      end
+
+      def logdest
+        Pathname.new(@config['logdest'])
+      end
+
+      def pkgbuild
+        Pathname.new(@config['pkgbuild'])
+      end
+
+      def package_dir(package_name)
+        pkgbuild.join(package_name)
+      end
+
+      def package_signer
+        @config['package_key'] && Signer.new(@config['package_key'])
+      end
+
+      def repo_signer
+        @config['repo_key'] && Signer.new(@config['repo_key'])
+      end
+
+      def builds
+        @config['builds']
       end
 
       def repo_path(arch)
