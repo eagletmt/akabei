@@ -80,12 +80,12 @@ module Akabei
       chroot.pacman_config = options[:pacman_config]
 
       repo_db = Repository.new
-      repo_db.signer = options[:repo_key] && Signer.new(options[:repo_key])
+      repo_db.signer = Signer.get(options[:repo_key])
       repo_files = Repository.new
       repo_files.include_files = true
 
       builder = Builder.new
-      builder.signer = options[:package_key] && Signer.new(options[:package_key])
+      builder.signer = Signer.get(options[:package_key])
       builder.srcdest = options[:srcdest]
       builder.logdest = options[:logdest]
 

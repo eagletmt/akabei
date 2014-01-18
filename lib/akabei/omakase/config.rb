@@ -82,11 +82,11 @@ module Akabei
       end
 
       def package_signer
-        @config['package_key'] && Signer.new(@config['package_key'])
+        Signer.get(@config['package_key'])
       end
 
       def repo_signer
-        @config['repo_key'] && Signer.new(@config['repo_key'])
+        Signer.get(@config['repo_key'])
       end
 
       def builds
