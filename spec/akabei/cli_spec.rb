@@ -22,11 +22,11 @@ describe Akabei::CLI do
       allow(package).to receive(:db_name).and_return('nkf-2.1.3-1')
       allow(package).to receive(:to_entry).and_return(entry)
 
-      expect_any_instance_of(Akabei::ChrootTree).to receive(:with_chroot) { |chroot, &block|
+      allow_any_instance_of(Akabei::ChrootTree).to receive(:with_chroot) { |chroot, &block|
         chroot_expectations.call(chroot)
         block.call
       }
-      expect_any_instance_of(Akabei::Builder).to receive(:build_package) { |builder, dir, chroot|
+      allow_any_instance_of(Akabei::Builder).to receive(:build_package) { |builder, dir, chroot|
         expect(builder).to receive(:with_source_package).with(package_dir.to_s).and_yield(srcpkg_path)
         [package]
       }
@@ -71,7 +71,7 @@ describe Akabei::CLI do
     let(:abs_path) { test_dest('abs.tar.gz') }
 
     it 'creates abs tarball' do
-      expect_any_instance_of(Akabei::Builder).to receive(:with_source_package).with(package_dir.to_s).and_yield(srcpkg_path)
+      allow_any_instance_of(Akabei::Builder).to receive(:with_source_package).with(package_dir.to_s).and_yield(srcpkg_path)
       cli.invoke(:abs_add, [package_dir.to_s, abs_path.to_s], repo_name: repo_name)
       expect(abs_path).to be_file
     end

@@ -93,7 +93,7 @@ describe Akabei::Omakase::CLI do
       }
       expect(config['builds'].size).to eq(2)
 
-      expect_any_instance_of(Akabei::Builder).to receive(:build_package).twice { |builder, dir, chroot|
+      allow_any_instance_of(Akabei::Builder).to receive(:build_package) { |builder, dir, chroot|
         expect(builder).to receive(:with_source_package).with(config.package_dir('nkf')).and_yield(test_input('nkf.tar.gz'))
         [packages[chroot.arch]]
       }
