@@ -76,12 +76,8 @@ module Akabei
     common_options :repo_name, :repo_key, :srcdest
     def build(package_dir)
       chroot = ChrootTree.new(options[:chroot_dir], options[:arch])
-      if options[:makepkg_config]
-        chroot.makepkg_config = options[:makepkg_config]
-      end
-      if options[:pacman_config]
-        chroot.pacman_config = options[:pacman_config]
-      end
+      chroot.makepkg_config = options[:makepkg_config]
+      chroot.pacman_config = options[:pacman_config]
 
       repo_db = Repository.new
       repo_db.signer = options[:repo_key] && Signer.new(options[:repo_key])
