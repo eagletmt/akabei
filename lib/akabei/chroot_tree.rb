@@ -13,6 +13,7 @@ module Akabei
       end
     end
 
+    attr_reader :root, :arch
     extend AttrPath
     attr_path_accessor :makepkg_config, :pacman_config
 
