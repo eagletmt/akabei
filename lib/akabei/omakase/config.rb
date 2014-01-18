@@ -12,7 +12,6 @@ module Akabei
 
       def self.load
         config = new
-        config.load(File.join(Dir.home, FILE_NAME))
         config.load(FILE_NAME)
         config
       end
