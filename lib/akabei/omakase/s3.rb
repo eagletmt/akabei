@@ -23,7 +23,9 @@ module Akabei
 
       def download_repository(config, arch)
         get(config.db_path(arch))
-        get(Pathname.new("#{config.db_path(arch)}.sig"))
+        if config.repo_signer
+          get(Pathname.new("#{config.db_path(arch)}.sig"))
+        end
         get(config.files_path(arch))
         get(config.abs_path(arch))
       end
@@ -47,14 +49,14 @@ module Akabei
       def upload_repository(config, arch, packages)
         packages.each do |package|
           put(package.path, XZ_MIME_TYPE)
-          if config['package_key']
+          if config.package_signer
             put(Pathname.new("#{package.path}.sig"), SIG_MIME_TYPE)
           end
         end
         put(config.abs_path(arch), GZIP_MIME_TYPE)
         put(config.files_path(arch), GZIP_MIME_TYPE)
         put(config.db_path(arch), GZIP_MIME_TYPE)
-        if config['repo_key']
+        if config.repo_signer
           put(Pathname.new("#{config.db_path(arch)}.sig"), SIG_MIME_TYPE)
         end
       end
