@@ -10,6 +10,13 @@ module Akabei
     attr_path_accessor :srcdest, :pkgdest, :logdest
     attr_accessor :signer
 
+    def initialize(opts = {})
+      self.srcdest = opts[:srcdest]
+      self.pkgdest = opts[:pkgdest]
+      self.logdest = opts[:logdest]
+      self.signer = opts[:signer]
+    end
+
     def build_package(dir, chroot_tree)
       Dir.mktmpdir do |tmp_pkgdest|
         wrap_dir(:srcdest) do

@@ -3,7 +3,7 @@ require 'akabei/builder'
 require 'akabei/signer'
 
 describe Akabei::Builder do
-  let(:builder) { described_class.new }
+  let(:builder) { described_class.new(pkgdest: pkgdest) }
   let(:pkgdest) { test_dest('packages').tap(&:mkpath) }
   let(:package_dir) { test_dest('nkf').tap(&:mkpath) }
   let(:pkgname) { 'nkf-2.1.3-1' }
@@ -13,10 +13,6 @@ describe Akabei::Builder do
   let(:log_build_fname) { "#{pkgname}-#{arch}-build.log" }
   let(:log_package_fname) { "#{pkgname}-#{arch}-package.log" }
   let(:srcpkg_fname) { "#{pkgname}.src.tar.gz" }
-
-  before do
-    builder.pkgdest = pkgdest
-  end
 
   describe '#build_package' do
     let(:chroot) { double('ChrootTree') }

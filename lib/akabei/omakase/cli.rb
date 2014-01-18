@@ -68,10 +68,11 @@ module Akabei
 
       desc 'build PACKAGE_NAME', "build PACKAGE_NAME"
       def build(package_name)
-        builder = Builder.new
-        builder.signer = config.package_signer
-        builder.srcdest = config.srcdest
-        builder.logdest = config.logdest
+        builder = Builder.new(
+          signer: config.package_signer,
+          srcdest: config.srcdest,
+          logdest: config.logdest,
+        )
         repo_signer = config.repo_signer
 
         s3 = S3.new(config['s3'], shell)

@@ -79,14 +79,14 @@ module Akabei
       chroot.makepkg_config = options[:makepkg_config]
       chroot.pacman_config = options[:pacman_config]
 
-      builder = Builder.new
-      builder.signer = Signer.get(options[:package_key])
-      builder.srcdest = options[:srcdest]
-      builder.logdest = options[:logdest]
-
       repo_path = Pathname.new(options[:repo_dir])
       repo_name = options[:repo_name]
-      builder.pkgdest = repo_path
+      builder = Builder.new(
+        signer: Signer.get(options[:package_key]),
+        srcdest: options[:srcdest],
+        logdest: options[:logdest],
+        pkgdest: repo_path,
+      )
 
       db_path = repo_path.join("#{repo_name}.db")
       files_path = repo_path.join("#{repo_name}.files")
