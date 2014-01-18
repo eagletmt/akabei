@@ -9,6 +9,7 @@ module Akabei
             secret_access_key: aws_config['secret_access_key'],
             region: aws_config['region'],
           ).buckets[aws_config['bucket']]
+          @write_options = aws_config['write_options']
           @shell = shell
         end
       end
@@ -63,7 +64,7 @@ module Akabei
 
       def put(path, mime_type)
         @shell.say("Upload #{path}", :green)
-        @bucket.objects[path.to_s].write(path, content_type: mime_type)
+        @bucket.objects[path.to_s].write(path, @write_options.merge(content_type: mime_type))
       end
     end
   end

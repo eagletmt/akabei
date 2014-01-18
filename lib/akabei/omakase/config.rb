@@ -26,7 +26,7 @@ module Akabei
       end
 
       def load(path)
-        @config.merge!(SafeYAML.load_file(path))
+        @config.merge!(SafeYAML.load_file(path, deserialize_symbols: true))
         true
       rescue Errno::ENOENT
         false

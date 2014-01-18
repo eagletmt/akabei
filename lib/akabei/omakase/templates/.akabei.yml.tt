@@ -17,4 +17,8 @@ s3:
   secret_access_key:
   bucket:
   region:
+  write_options:
+    # :acl: :public_read
+    # :reduced_redundancy: false
+    # :server_side_encryption: :aes256
 <%- end -%>

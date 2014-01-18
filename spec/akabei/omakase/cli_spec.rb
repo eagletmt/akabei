@@ -113,6 +113,7 @@ describe Akabei::Omakase::CLI do
       let(:buckets) { double('S3::BucketCollection') }
       let(:bucket) { double('S3::Bucket') }
       let(:objects) { double('S3::ObjectCollection') }
+      let(:write_options) { { reduced_redundancy: true } }
 
       before do
         c = SafeYAML.load_file('.akabei.yml')
@@ -120,6 +121,7 @@ describe Akabei::Omakase::CLI do
         c['s3']['secret_access_key'] = secret_access_key
         c['s3']['bucket'] = bucket_name
         c['s3']['region'] = region
+        c['s3']['write_options'] = write_options
         open('.akabei.yml', 'w') { |f| YAML.dump(c, f) }
 
         allow_any_instance_of(AWS::S3).to receive(:buckets).and_return(buckets)
@@ -142,7 +144,7 @@ describe Akabei::Omakase::CLI do
           pkg = double("S3::Object built package (#{arch})")
           db_name = "nkf-2.1.3-1-#{arch}.pkg.tar.xz"
           expect(objects).to receive(:[]).with("test/os/#{arch}/#{db_name}").and_return(pkg)
-          expect(pkg).to receive(:write)
+          expect(pkg).to receive(:write).with(anything, hash_including(write_options))
         end
 
         cli.invoke(:build, ['nkf'])
