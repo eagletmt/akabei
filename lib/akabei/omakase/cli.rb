@@ -1,4 +1,4 @@
-require 'akabei/cli'
+require 'akabei/build_helper'
 require 'akabei/omakase/config'
 require 'akabei/omakase/s3'
 require 'thor'
@@ -10,6 +10,7 @@ module Akabei
 
       include Thor::Actions
       include Thor::Shell
+      include BuildHelper
 
       def self.source_root
         File.expand_path('../templates', __FILE__)
@@ -94,18 +95,10 @@ module Akabei
           repo_db = Repository.load(db_path, signer: repo_signer)
           repo_files = Repository.load(files_path, include_files: true)
 
-          package_dir = config.package_dir(package_name)
-          chroot.with_chroot do
-            packages = builder.build_package(package_dir, chroot)
-            packages.each do |package|
-              repo_db.add(package)
-              repo_files.add(package)
-            end
-            abs.add(package_dir, builder)
-            repo_db.save(db_path)
-            repo_files.save(files_path)
-            s3.after!(config, arch, packages)
-          end
+          packages = build_in_chroot(builder, chroot, repo_db, repo_files, abs, config.package_dir(package_name))
+          repo_db.save(db_path)
+          repo_files.save(files_path)
+          s3.after!(config, arch, packages)
         end
       end
 

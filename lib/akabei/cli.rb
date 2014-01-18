@@ -1,4 +1,5 @@
 require 'akabei/abs'
+require 'akabei/build_helper'
 require 'akabei/builder'
 require 'akabei/chroot_tree'
 require 'akabei/omakase/cli'
@@ -42,6 +43,7 @@ module Akabei
     end
     extend CommonOptions
 
+    include BuildHelper
     desc 'build DIR', 'Build package in chroot environment'
     option :chroot_dir,
       desc: 'Path to chroot top',
@@ -95,16 +97,9 @@ module Akabei
 
       abs = Abs.new(repo_path.join("#{repo_name}.abs.tar.gz"), repo_name)
 
-      chroot.with_chroot do
-        packages = builder.build_package(package_dir, chroot)
-        packages.each do |package|
-          repo_db.add(package)
-          repo_files.add(package)
-        end
-        abs.add(package_dir, builder)
-        repo_db.save(db_path)
-        repo_files.save(files_path)
-      end
+      build_in_chroot(builder, chroot, repo_db, repo_files, abs, package_dir)
+      repo_db.save(db_path)
+      repo_files.save(files_path)
     end
 
     desc 'abs-add DIR ABS_TARBALL', 'Add the package inside DIR to ABS_TARBALL'
