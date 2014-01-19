@@ -20,7 +20,7 @@ module Akabei
         super(task, nil, true)
       end
 
-      desc 'init NAME', "Generate omakase template for NAME repository"
+      desc 'init NAME', 'Generate omakase template for NAME repository'
       option :repo_key,
         desc: 'GPG key to sign repository database',
         banner: 'GPGKEY',
@@ -67,7 +67,7 @@ module Akabei
         say('Edit etc/makepkg.*.conf and set PACKAGER first!', :green)
       end
 
-      desc 'build PACKAGE_NAME', "build PACKAGE_NAME"
+      desc 'build PACKAGE_NAME', 'Build PACKAGE_NAME'
       def build(package_name)
         builder = Builder.new(
           signer: config.package_signer,
@@ -101,7 +101,7 @@ module Akabei
         end
       end
 
-      desc 'remove PACKAGE_NAME', 'remove PACKAGE_NAME'
+      desc 'remove PACKAGE_NAME', 'Remove PACKAGE_NAME'
       def remove(package_name)
         repo_signer = config.repo_signer
         s3 = S3.new(config['s3'], shell)

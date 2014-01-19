@@ -171,6 +171,6 @@ module Akabei
       end
     end
 
-    Akabei::CLI.register(Akabei::Omakase::CLI, 'omakase', 'omakase <command>', 'Omakase mode')
+    Akabei::CLI.register(Akabei::Omakase::CLI, 'omakase', 'omakase <command>', 'Omakase mode. See `akabei omakase help`.')
   end
 end
