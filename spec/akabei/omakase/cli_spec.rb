@@ -71,32 +71,26 @@ describe Akabei::Omakase::CLI do
 
   describe '#build' do
     let(:config) { Akabei::Omakase::Config.load }
-    let(:packages) { { 'i686' => double('built package (i686)'), 'x86_64' => double('built package (x86_64)') } }
-    let(:entry) { Akabei::PackageEntry.new }
     let(:init_opts) { {} }
 
     before do
       cli.invoke(:init, ['test'], init_opts)
       tar('xf', test_input('nkf.tar.gz').to_s, '-C', config.pkgbuild.to_s)
 
-      packages.each do |arch, package|
-        allow(package).to receive(:name).and_return('nkf')
-        allow(package).to receive(:to_entry).and_return(entry)
-        allow(package).to receive(:path).and_return(Pathname.new("test/os/#{arch}/nkf-2.1.3-1-#{arch}.pkg.tar.xz"))
-      end
-      entry.add('files', 'usr/bin/nkf')
-
-      allow_any_instance_of(Akabei::ChrootTree).to receive(:with_chroot) { |chroot, &block|
-        expect(chroot.makepkg_config.to_s).to eq("etc/makepkg.#{chroot.arch}.conf")
-        expect(chroot.pacman_config.to_s).to eq("etc/pacman.#{chroot.arch}.conf")
-        block.call
-      }
       expect(config['builds'].size).to eq(2)
 
-      allow_any_instance_of(Akabei::Builder).to receive(:build_package) { |builder, dir, chroot|
-        expect(builder).to receive(:with_source_package).with(config.package_dir('nkf')).and_yield(test_input('nkf.tar.gz'))
-        [packages[chroot.arch]]
-      }
+      %w[i686 x86_64].each do |arch|
+        expect(Akabei::System).to receive(:sudo).with(array_starting_with(['mkarchroot']), hash_including(arch: arch))
+        expect(Akabei::System).to receive(:sudo).with(['rm', '-rf', anything], {})
+
+        expect(Akabei::System).to receive(:sudo).with(['makechrootpkg', '-cur', anything], hash_including(arch: arch, chdir: config.package_dir('nkf').to_s)) { |args, opts|
+          FileUtils.cp(test_input('nkf-2.1.3-1-x86_64.pkg.tar.xz'), opts[:env][:PKGDEST].join("nkf-2.1.3-1-#{arch}.pkg.tar.xz"))
+        }
+        expect(Akabei::System).to receive(:system).with(['makepkg', '--source'], hash_including(chdir: config.package_dir('nkf'))) { |args, opts|
+          FileUtils.cp(test_input('nkf.tar.gz'), opts[:env][:SRCPKGDEST])
+          Pathname.new(opts[:chdir]).join('nkf.tar.gz').make_symlink(opts[:env][:SRCPKGDEST])
+        }
+      end
     end
 
     it 'builds a package and add it to repository' do

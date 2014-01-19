@@ -10,25 +10,20 @@ describe Akabei::CLI do
   describe '#build' do
     let(:repo_dir) { test_dest('repo').tap(&:mkpath) }
     let(:base_opts) { { arch: 'x86_64', repo_dir:  repo_dir.to_s, repo_name: 'test' } }
-    let(:package) { double('built package') }
-    let(:entry) { Akabei::PackageEntry.new }
-    let(:chroot_expectations) { lambda { |chroot| } }
 
     before do
       tar('xf', test_input('nkf.tar.gz').to_s, '-C', package_dir.parent.to_s)
-      # Disable warning
-      entry.add('files', 'usr/bin/nkf')
 
-      allow(package).to receive(:name).and_return('nkf')
-      allow(package).to receive(:to_entry).and_return(entry)
+      expect(Akabei::System).to receive(:sudo).with(array_starting_with(['mkarchroot']), hash_including(arch: 'x86_64'))
+      expect(Akabei::System).to receive(:sudo).with(['rm', '-rf', anything], {})
 
-      allow_any_instance_of(Akabei::ChrootTree).to receive(:with_chroot) { |chroot, &block|
-        chroot_expectations.call(chroot)
-        block.call
+      expect(Akabei::System).to receive(:sudo).with(['makechrootpkg', '-cur', anything], hash_including(arch: 'x86_64', chdir: package_dir.to_s)) { |args, opts|
+        FileUtils.cp(test_input('nkf-2.1.3-1-x86_64.pkg.tar.xz'), opts[:env][:PKGDEST])
       }
-      allow_any_instance_of(Akabei::Builder).to receive(:build_package) { |builder, dir, chroot|
-        expect(builder).to receive(:with_source_package).with(package_dir.to_s).and_yield(srcpkg_path)
-        [package]
+      expect(Akabei::System).to receive(:system).with(['makepkg', '--source'], hash_including(chdir: package_dir)) { |args, opts|
+        # Simulate `makepkg --source`
+        FileUtils.cp(test_input('nkf.tar.gz'), opts[:env][:SRCPKGDEST])
+        Pathname.new(opts[:chdir]).join('nkf.tar.gz').make_symlink(opts[:env][:SRCPKGDEST])
       }
     end
 

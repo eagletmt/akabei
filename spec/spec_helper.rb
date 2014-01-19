@@ -75,6 +75,26 @@ module TarHelpers
   end
 end
 
+module ArrayStartingWith
+  class Matcher
+    def initialize(expected)
+      @expected = expected
+    end
+
+    def description
+      "array_starting_with(#{@expected.join(',')})"
+    end
+
+    def ==(actual)
+      actual[0 ... @expected.length] == @expected
+    end
+  end
+
+  def array_starting_with(expected)
+    Matcher.new(expected)
+  end
+end
+
 module IntegrationSpecHelper
   def akabei(*cmd)
     system(File.expand_path('../../bin/akabei', __FILE__), *cmd)
@@ -107,4 +127,5 @@ RSpec.configure do |config|
   config.include OutputHelpers
   config.include TarHelpers
   config.include IntegrationSpecHelper
+  config.include ArrayStartingWith
 end
