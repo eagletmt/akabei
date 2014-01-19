@@ -6,6 +6,7 @@ require 'akabei/omakase/cli'
 require 'akabei/package'
 require 'akabei/repository'
 require 'akabei/signer'
+require 'akabei/version'
 require 'pathname'
 require 'thor'
 require 'tmpdir'
@@ -154,6 +155,18 @@ module Akabei
       repo.load(db_path)
       repo.remove(package_name)
       repo.save(db_path)
+    end
+
+    desc 'version', 'Show version'
+    option :numeric,
+      desc: 'Display version number only',
+      type: :boolean
+    def version
+      if options[:numeric]
+        puts VERSION
+      else
+        puts "akabei #{VERSION} on #{RUBY_DESCRIPTION}"
+      end
     end
 
     Akabei::CLI.register(Akabei::Omakase::CLI, 'omakase', 'omakase <command>', 'Omakase mode')

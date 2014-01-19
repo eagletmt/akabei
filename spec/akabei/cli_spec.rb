@@ -132,4 +132,19 @@ describe Akabei::CLI do
       expect(tar('tf', files_path.to_s)).to_not include('htop-vi-1.0.2-4/files')
     end
   end
+
+  describe '#version' do
+    it 'displays version' do
+      stdout = capture_stdout { cli.invoke(:version) }
+      expect(stdout).to include('akabei')
+      expect(stdout).to include(Akabei::VERSION)
+    end
+
+    context 'with --numeric' do
+      it 'displays version number only' do
+        stdout = capture_stdout { cli.invoke(:version, [], numeric: true) }
+        expect(stdout.strip).to eq(Akabei::VERSION)
+      end
+    end
+  end
 end
