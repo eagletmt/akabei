@@ -13,21 +13,10 @@ describe Akabei::CLI do
 
     before do
       tar('xf', test_input('nkf.tar.gz').to_s, '-C', package_dir.parent.to_s)
-
-      expect(Akabei::System).to receive(:sudo).with(array_starting_with(['mkarchroot']), hash_including(arch: 'x86_64'))
-      expect(Akabei::System).to receive(:sudo).with(['rm', '-rf', anything], {})
-
-      expect(Akabei::System).to receive(:sudo).with(['makechrootpkg', '-cur', anything], hash_including(arch: 'x86_64', chdir: package_dir.to_s)) { |args, opts|
-        FileUtils.cp(test_input('nkf-2.1.3-1-x86_64.pkg.tar.xz'), opts[:env][:PKGDEST])
-      }
-      expect(Akabei::System).to receive(:system).with(['makepkg', '--source'], hash_including(chdir: package_dir)) { |args, opts|
-        # Simulate `makepkg --source`
-        FileUtils.cp(test_input('nkf.tar.gz'), opts[:env][:SRCPKGDEST])
-        Pathname.new(opts[:chdir]).join('nkf.tar.gz').make_symlink(opts[:env][:SRCPKGDEST])
-      }
     end
 
     it 'calls Builder#build_package in chroot and create repository database' do
+      setup_command_expectations('x86_64', package_dir)
       cli.invoke(:build, [package_dir.to_s], base_opts)
       expect(repo_dir.join('test.db')).to be_file
       expect(repo_dir.join('test.files')).to be_file
@@ -43,6 +32,7 @@ describe Akabei::CLI do
       }
 
       it 'calls ChrootTree#with_chroot with makepkg_config' do
+        setup_command_expectations('x86_64', package_dir)
         cli.invoke(:build, [package_dir.to_s], base_opts.merge(makepkg_config: makepkg_path.to_s))
       end
     end
@@ -56,7 +46,17 @@ describe Akabei::CLI do
       }
 
       it 'calls ChrootTree#with_chroot with pacman_config' do
+        setup_command_expectations('x86_64', package_dir)
         cli.invoke(:build, [package_dir.to_s], base_opts.merge(pacman_config: pacman_path.to_s))
+      end
+    end
+
+    context "when package_dir isn't a directory" do
+      let(:package_dir) { test_dest('does-not-exist') }
+
+      it 'fails early' do
+        expect(Akabei::System).to_not receive(:system)
+        expect { cli.invoke(:build, [package_dir.to_s], base_opts) }.to raise_error(Akabei::Error, /isn't a directory/)
       end
     end
   end

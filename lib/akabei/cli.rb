@@ -98,7 +98,7 @@ module Akabei
 
       abs = Abs.new(repo_path.join("#{repo_name}.abs.tar.gz"), repo_name)
 
-      build_in_chroot(builder, chroot, repo_db, repo_files, abs, package_dir)
+      build_in_chroot(builder, chroot, repo_db, repo_files, abs, Pathname.new(package_dir))
       repo_db.save(db_path)
       repo_files.save(files_path)
     end

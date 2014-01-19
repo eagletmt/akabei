@@ -76,24 +76,12 @@ describe Akabei::Omakase::CLI do
     before do
       cli.invoke(:init, ['test'], init_opts)
       tar('xf', test_input('nkf.tar.gz').to_s, '-C', config.pkgbuild.to_s)
-
-      expect(config['builds'].size).to eq(2)
-
-      %w[i686 x86_64].each do |arch|
-        expect(Akabei::System).to receive(:sudo).with(array_starting_with(['mkarchroot']), hash_including(arch: arch))
-        expect(Akabei::System).to receive(:sudo).with(['rm', '-rf', anything], {})
-
-        expect(Akabei::System).to receive(:sudo).with(['makechrootpkg', '-cur', anything], hash_including(arch: arch, chdir: config.package_dir('nkf').to_s)) { |args, opts|
-          FileUtils.cp(test_input('nkf-2.1.3-1-x86_64.pkg.tar.xz'), opts[:env][:PKGDEST].join("nkf-2.1.3-1-#{arch}.pkg.tar.xz"))
-        }
-        expect(Akabei::System).to receive(:system).with(['makepkg', '--source'], hash_including(chdir: config.package_dir('nkf'))) { |args, opts|
-          FileUtils.cp(test_input('nkf.tar.gz'), opts[:env][:SRCPKGDEST])
-          Pathname.new(opts[:chdir]).join('nkf.tar.gz').make_symlink(opts[:env][:SRCPKGDEST])
-        }
-      end
     end
 
     it 'builds a package and add it to repository' do
+      %w[i686 x86_64].each do |arch|
+        setup_command_expectations(arch, config.package_dir('nkf'))
+      end
       cli.invoke(:build, ['nkf'])
     end
 
@@ -122,6 +110,9 @@ describe Akabei::Omakase::CLI do
       end
 
       it 'uploads built packages and update repositories' do
+        %w[i686 x86_64].each do |arch|
+          setup_command_expectations(arch, config.package_dir('nkf'))
+        end
         expect(buckets).to receive(:[]).with(bucket_name).and_return(bucket)
         allow(bucket).to receive(:objects).and_return(objects)
 
@@ -142,6 +133,13 @@ describe Akabei::Omakase::CLI do
         end
 
         cli.invoke(:build, ['nkf'])
+      end
+    end
+
+    context 'when PACKAGE_NAME is wrong' do
+      it 'fails early' do
+        expect(Akabei::System).to_not receive(:system)
+        expect { cli.invoke(:build, ['wrong']) }.to raise_error(Akabei::Error)
       end
     end
   end

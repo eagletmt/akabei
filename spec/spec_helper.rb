@@ -101,6 +101,22 @@ module IntegrationSpecHelper
   end
 end
 
+module BuildSpecHelper
+  def setup_command_expectations(arch, package_dir)
+    expect(Akabei::System).to receive(:sudo).with(array_starting_with(['mkarchroot']), hash_including(arch: arch))
+    expect(Akabei::System).to receive(:sudo).with(['rm', '-rf', anything], {})
+
+    expect(Akabei::System).to receive(:sudo).with(['makechrootpkg', '-cur', anything], hash_including(arch: arch, chdir: package_dir.to_s)) { |args, opts|
+      FileUtils.cp(test_input('nkf-2.1.3-1-x86_64.pkg.tar.xz'), opts[:env][:PKGDEST].join("nkf-2.1.3-1-#{arch}.pkg.tar.xz"))
+    }
+    expect(Akabei::System).to receive(:system).with(['makepkg', '--source'], hash_including(chdir: package_dir)) { |args, opts|
+      # Simulate `makepkg --source`
+      FileUtils.cp(test_input('nkf.tar.gz'), opts[:env][:SRCPKGDEST])
+      Pathname.new(opts[:chdir]).join('nkf.tar.gz').make_symlink(opts[:env][:SRCPKGDEST])
+    }
+  end
+end
+
 RSpec.configure do |config|
   config.filter_run :focus
   if ENV['AKABEI_ARCH_SPEC']
@@ -128,4 +144,5 @@ RSpec.configure do |config|
   config.include TarHelpers
   config.include IntegrationSpecHelper
   config.include ArrayStartingWith
+  config.include BuildSpecHelper
 end
