@@ -44,6 +44,8 @@ module Akabei
     end
     extend CommonOptions
 
+    package_name 'akabei'
+
     include BuildHelper
     desc 'build DIR', 'Build package in chroot environment'
     option :chroot_dir,
