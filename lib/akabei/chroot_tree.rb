@@ -1,18 +1,11 @@
 require 'akabei/attr_path'
 require 'akabei/error'
+require 'akabei/system'
 require 'pathname'
 require 'tmpdir'
 
 module Akabei
   class ChrootTree
-    class CommandFailed < Error
-      attr_reader :args
-      def initialize(args)
-        super("command failed: #{args.join(' ')}")
-        @args = args
-      end
-    end
-
     attr_reader :root, :arch
     extend AttrPath
     attr_path_accessor :makepkg_config, :pacman_config
@@ -26,53 +19,33 @@ module Akabei
 
     def with_chroot(&block)
       if @root
-        mkarchroot(*BASE_PACKAGES)
+        mkarchroot(BASE_PACKAGES)
         block.call
       else
         @root = Pathname.new(Dir.mktmpdir)
         begin
-          mkarchroot(*BASE_PACKAGES)
+          mkarchroot(BASE_PACKAGES)
           block.call
         ensure
-          execute('rm', '-rf', @root.to_s)
+          System.sudo(['rm', '-rf', @root], {})
           @root = nil
         end
       end
     end
 
     def makechrootpkg(dir, env)
-      execute('makechrootpkg', '-cur', @root.to_s, chdir: dir, env: env)
+      System.sudo(['makechrootpkg', '-cur', @root], chdir: dir, env: env, arch: @arch)
     end
 
-    def mkarchroot(*args)
+    def mkarchroot(args)
       cmd = ['mkarchroot']
       [['-M', makepkg_config], ['-C', pacman_config]].each do |flag, path|
         if path
-          cmd << flag << path.to_s
+          cmd << flag << path
         end
       end
-      cmd << @root.join('root').to_s
-      execute(*(cmd + args))
-    end
-
-    def execute(*args)
-      if args.last.is_a?(Hash)
-        opts = args.last
-        if opts.has_key?(:env)
-          opts = opts.dup
-          env = opts.delete(:env)
-          env.each do |k, v|
-            args.unshift("#{k}=#{v}")
-          end
-          args.unshift('env')
-          args[-1] = opts
-        end
-      end
-
-      puts "Execute: #{args.join(' ')}"
-      unless system('sudo', 'setarch', @arch, *args)
-        raise CommandFailed.new(args)
-      end
+      cmd << @root.join('root')
+      System.sudo(cmd + args, arch: @arch)
     end
   end
 end

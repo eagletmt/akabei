@@ -94,16 +94,17 @@ describe Akabei::Builder do
 
   describe '#with_source_package' do
     before do
-      expect(builder).to receive(:system).once.with(any_args) { |env, makepkg, source, opts|
-        srcdest = Pathname.new(env['SRCDEST'])
-        srcpkgdest = Pathname.new(env['SRCPKGDEST'])
-        builddir = Pathname.new(env['BUILDDIR'])
+      expect(Akabei::System).to receive(:system) { |args, opts|
+        env = opts[:env]
+        srcdest = Pathname.new(env[:SRCDEST])
+        srcpkgdest = Pathname.new(env[:SRCPKGDEST])
+        builddir = Pathname.new(env[:BUILDDIR])
         expect(srcdest).to be_directory
         expect(srcpkgdest).to be_directory
         expect(builddir).to be_directory
 
-        expect(makepkg).to eq('makepkg')
-        expect(source).to eq('--source')
+        expect(args[0]).to eq('makepkg')
+        expect(args[1]).to eq('--source')
         expect(opts[:chdir]).to eq(package_dir)
 
         # Simulate `makepkg --source`

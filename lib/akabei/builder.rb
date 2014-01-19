@@ -1,6 +1,7 @@
 require 'akabei/attr_path'
 require 'akabei/error'
 require 'akabei/package'
+require 'akabei/system'
 require 'fileutils'
 require 'tmpdir'
 
@@ -92,13 +93,11 @@ module Akabei
 
     def makepkg_source(dir, srcdest, srcpkgdest, builddir)
       env = {
-        'SRCDEST' => srcdest.realpath.to_s,
-        'SRCPKGDEST' => srcpkgdest.realpath.to_s,
-        'BUILDDIR' => builddir.realpath.to_s,
+        SRCDEST: srcdest.realpath,
+        SRCPKGDEST: srcpkgdest.realpath,
+        BUILDDIR: builddir.realpath,
       }
-      unless system(env, 'makepkg', '--source', chdir: dir)
-        raise Error.new("makepkg --source failed: #{dir}")
-      end
+      System.system(%w[makepkg --source], chdir: dir, env: env)
     end
 
     def find_source_package(srcpkgdest)
