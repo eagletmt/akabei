@@ -55,10 +55,6 @@ module Akabei
       execute(*(cmd + args))
     end
 
-    def arch_nspawn(*args)
-      execute('arch-nspawn', @root.join('root').to_s, *args)
-    end
-
     def execute(*args)
       if args.last.is_a?(Hash)
         opts = args.last
