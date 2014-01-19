@@ -1,5 +1,7 @@
 require 'spec_helper'
+require 'akabei/abs'
 require 'akabei/cli'
+require 'akabei/repository'
 
 class TestShell < Thor::Shell::Basic
   attr_reader :stdout
@@ -140,6 +142,34 @@ describe Akabei::Omakase::CLI do
       it 'fails early' do
         expect(Akabei::System).to_not receive(:system)
         expect { cli.invoke(:build, ['wrong']) }.to raise_error(Akabei::Error)
+      end
+    end
+  end
+
+  describe '#remove' do
+    let(:config) { Akabei::Omakase::Config.load }
+
+    it 'removes package' do
+      cli.invoke(:init, ['test'])
+      %w[i686 x86_64].each do |arch|
+        config.repo_path(arch).mkpath
+        FileUtils.cp(test_input('test.db'), config.db_path(arch))
+        FileUtils.cp(test_input('test.files'), config.files_path(arch))
+        FileUtils.cp(test_input('abs.tar.gz'), config.abs_path(arch))
+      end
+
+      %w[i686 x86_64].each do |arch|
+        expect(tar('tf', config.db_path(arch).to_s)).to include('htop-vi-1.0.2-4/desc')
+        expect(tar('tf', config.files_path(arch).to_s)).to include('htop-vi-1.0.2-4/files')
+        expect(tar('tf', config.abs_path(arch).to_s)).to include('test/htop-vi/PKGBUILD')
+      end
+
+      cli.invoke(:remove, ['htop-vi'])
+
+      %w[i686 x86_64].each do |arch|
+        expect(tar('tf', config.db_path(arch).to_s)).to_not include('htop-vi-1.0.2-4/desc')
+        expect(tar('tf', config.files_path(arch).to_s)).to_not include('htop-vi-1.0.2-4/files')
+        expect(tar('tf', config.abs_path(arch).to_s)).to_not include('test/htop-vi/PKGBUILD')
       end
     end
   end

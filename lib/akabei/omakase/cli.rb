@@ -75,7 +75,6 @@ module Akabei
           logdest: config.logdest,
         )
         repo_signer = config.repo_signer
-
         s3 = S3.new(config['s3'], shell)
 
         config.builds.each do |arch, config_file|
@@ -102,6 +101,29 @@ module Akabei
         end
       end
 
+      desc 'remove PACKAGE_NAME', 'remove PACKAGE_NAME'
+      def remove(package_name)
+        repo_signer = config.repo_signer
+        s3 = S3.new(config['s3'], shell)
+
+        config.builds.each do |arch, config_file|
+          db_path = config.db_path(arch)
+          files_path = config.files_path(arch)
+          abs = Abs.new(config.abs_path(arch), config.name)
+
+          s3.before!(config, arch)
+          repo_db = Repository.load(db_path, signer: repo_signer)
+          repo_files = Repository.load(files_path, include_files: true)
+
+          remove_it(repo_db, package_name)
+          remove_it(repo_files, package_name)
+          abs.remove(package_name)
+          repo_db.save(db_path)
+          repo_files.save(files_path)
+          s3.after!(config, arch, [])
+        end
+      end
+
       private
 
       def config
@@ -109,6 +131,15 @@ module Akabei
           c = Config.load
           c.validate!
           c
+        end
+      end
+
+      def remove_it(repo, package_name)
+        entry = repo.remove(package_name)
+        if entry
+          say("#{entry.db_name} is removed")
+        else
+          say("WARNING: #{package_name} doesn't exist", :yellow)
         end
       end
     end
