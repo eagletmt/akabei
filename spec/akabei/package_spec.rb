@@ -8,7 +8,8 @@ describe Akabei::Package do
   describe '#pkginfo' do
     it 'returns PackageInfo' do
       pkginfo = package.pkginfo
-      expect(package.db_name).to eq('nkf-2.1.3-1')
+      expect(package.name).to eq('nkf')
+      expect(package.version).to eq('2.1.3-1')
     end
 
     context "when pkg_path doesn't exist" do

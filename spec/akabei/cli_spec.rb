@@ -19,7 +19,7 @@ describe Akabei::CLI do
       # Disable warning
       entry.add('files', 'usr/bin/nkf')
 
-      allow(package).to receive(:db_name).and_return('nkf-2.1.3-1')
+      allow(package).to receive(:name).and_return('nkf')
       allow(package).to receive(:to_entry).and_return(entry)
 
       allow_any_instance_of(Akabei::ChrootTree).to receive(:with_chroot) { |chroot, &block|

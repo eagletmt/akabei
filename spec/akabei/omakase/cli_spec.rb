@@ -80,7 +80,7 @@ describe Akabei::Omakase::CLI do
       tar('xf', test_input('nkf.tar.gz').to_s, '-C', config.pkgbuild.to_s)
 
       packages.each do |arch, package|
-        allow(package).to receive(:db_name).and_return('nkf-2.1.3-1')
+        allow(package).to receive(:name).and_return('nkf')
         allow(package).to receive(:to_entry).and_return(entry)
         allow(package).to receive(:path).and_return(Pathname.new("test/os/#{arch}/nkf-2.1.3-1-#{arch}.pkg.tar.xz"))
       end

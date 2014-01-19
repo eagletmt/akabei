@@ -17,15 +17,7 @@ module Akabei
 
     extend Forwardable
     include Enumerable
-    def_delegator(:@db, :each)
-
-    def [](package_name)
-      @db.each do |_, entry|
-        if entry.name == package_name
-          return entry
-        end
-      end
-    end
+    def_delegators(:@db, :each, :[])
 
     def ==(other)
       other.is_a?(self.class) &&
@@ -38,20 +30,24 @@ module Akabei
       path = Pathname.new(path)
       return unless path.readable?
       verify!(path)
+      db = {}
       ArchiveUtils.each_entry(path) do |entry, archive|
-        pkgname, key = *entry.pathname.split('/', 2)
+        db_name, key = *entry.pathname.split('/', 2)
         if key.include?('/')
           raise Error.new("Malformed repository database: #{path}: #{entry.pathname}")
         end
-        @db[pkgname] ||= PackageEntry.new
+        db[db_name] ||= PackageEntry.new
         case key
         when ''
           # Ignore
         when 'desc', 'depends', 'files'
-          load_entries(@db[pkgname], archive.read_data)
+          load_entries(db[db_name], archive.read_data)
         else
           raise Error.new("Unknown repository database key: #{key}")
         end
+      end
+      db.each_value do |entry|
+        @db[entry.name] = entry
       end
       nil
     end
@@ -77,17 +73,11 @@ module Akabei
     end
 
     def add(package)
-      @db[package.db_name] = package.to_entry
+      @db[package.name] = package.to_entry
     end
 
     def remove(pkgname)
-      @db.keys.each do |key|
-        if @db[key].name == pkgname
-          @db.delete(key)
-          return true
-        end
-      end
-      false
+      @db.delete(pkgname)
     end
 
     def verify!(path)
@@ -114,8 +104,8 @@ module Akabei
     end
 
     def store_tree(topdir)
-      @db.each do |db_name, pkg_entry|
-        pkgdir = topdir.join(db_name)
+      @db.each_value do |pkg_entry|
+        pkgdir = topdir.join(pkg_entry.db_name)
         pkgdir.mkpath
         pkgdir.join('desc').open('w') do |f|
           pkg_entry.write_desc(f)
@@ -132,15 +122,15 @@ module Akabei
     end
 
     def create_db(topdir, archive)
-      @db.keys.sort.each do |db_name|
-        pkg_entry = @db[db_name]
+      @db.keys.sort.each do |pkgname|
+        pkg_entry = @db[pkgname]
         archive.new_entry do |entry|
-          entry.pathname = "#{db_name}/"
+          entry.pathname = "#{pkg_entry.db_name}/"
           entry.copy_stat(topdir.join(entry.pathname).to_s)
           archive.write_header(entry)
         end
         %w[desc depends files].each do |fname|
-          pathname = "#{db_name}/#{fname}"
+          pathname = "#{pkg_entry.db_name}/#{fname}"
           path = topdir.join(pathname)
           if path.readable?
             archive.new_entry do |entry|

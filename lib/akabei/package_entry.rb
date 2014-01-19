@@ -65,6 +65,10 @@ module Akabei
       end
     end
 
+    def db_name
+      "#{name}-#{version}"
+    end
+
     def write_desc(io)
       ARRAY_DESC_ATTRIBUTES.each do |attr|
         write_array(io, attr)

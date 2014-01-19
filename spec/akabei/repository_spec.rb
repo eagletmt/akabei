@@ -81,12 +81,32 @@ describe Akabei::Repository do
     it 'adds an entry' do
       package = double('package')
       entry = double('entry')
-      allow(package).to receive(:db_name).and_return('nkf-2.1.3-1')
+      allow(package).to receive(:name).and_return('nkf')
       expect(package).to receive(:to_entry).and_return(entry)
       allow(entry).to receive(:name).and_return('nkf')
 
       repo.add(package)
       expect(repo['nkf']).to eql(entry)
+    end
+
+    context 'with old version' do
+      let(:old_package) { double('old package') }
+      let(:old_entry) { double('old entry') }
+
+      before do
+        allow(old_package).to receive(:name).and_return('nkf')
+        allow(old_package).to receive(:to_entry).and_return(old_entry)
+        repo.add(old_package)
+      end
+
+      it 'replaces old version' do
+        package = double('package')
+        entry = double('entry')
+        allow(package).to receive(:name).and_return('nkf')
+        allow(package).to receive(:to_entry).and_return(entry)
+
+        expect { repo.add(package) }.to change { repo['nkf'] }.from(old_entry).to(entry)
+      end
     end
   end
 

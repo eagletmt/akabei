@@ -36,10 +36,6 @@ module Akabei
       raise NotFound.new(@path, '.PKGINFO')
     end
 
-    def db_name
-      "#{pkgname}-#{pkgver}"
-    end
-
     def csize
       @path.size
     end
