@@ -1,3 +1,6 @@
+# 0.2.1 (2014-01-19)
+- Fix Repository#add to remove old entry with same pkgname
+
 # 0.2.0 (2014-01-19)
 - Add omakase mode
     - akabei omakase init
