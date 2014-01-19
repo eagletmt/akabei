@@ -28,7 +28,7 @@ module Akabei
               PKGDEST: tmp_pkgdest.realpath,
               LOGDEST: logdest.realpath,
             }
-            chroot_tree.makechrootpkg(dir.to_s, env)
+            chroot_tree.makechrootpkg(dir, env)
             gather_packages(tmp_pkgdest)
           end
         end
@@ -44,7 +44,7 @@ module Akabei
     end
 
     def copy_and_sign_package(package_path, dest)
-      FileUtils.cp(package_path.to_s, dest.to_s)
+      FileUtils.cp(package_path, dest)
       if signer
         signer.detach_sign(dest)
       end

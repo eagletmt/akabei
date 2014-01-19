@@ -21,9 +21,9 @@ module Akabei
             ArchiveUtils.extract_all(@path, tree)
           end
           pkgname = detect_pkgname(srcpkg)
-          FileUtils.rm_rf(root.join(pkgname).to_s)
+          FileUtils.rm_rf(root.join(pkgname))
           ArchiveUtils.extract_all(srcpkg, root)
-          FileUtils.rm_f(@path.to_s)
+          FileUtils.rm_f(@path)
           ArchiveUtils.archive_all(tree, @path, Archive::COMPRESSION_GZIP, Archive::FORMAT_TAR)
         end
       end

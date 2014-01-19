@@ -18,7 +18,7 @@ describe Akabei::Builder do
     let(:chroot) { double('ChrootTree') }
 
     before do
-      expect(chroot).to receive(:makechrootpkg).once.with(package_dir.to_s, anything) { |dir, env|
+      expect(chroot).to receive(:makechrootpkg).once.with(package_dir, anything) { |dir, env|
         expect(env[:SRCDEST]).to be_directory
         expect(env[:PKGDEST]).to be_directory
         expect(env[:LOGDEST]).to be_directory
