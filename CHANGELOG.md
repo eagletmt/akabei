@@ -1,3 +1,8 @@
+# 0.3.0 (2014-01-23)
+- Add `akabei omakase remove` command
+- Add `akabei version` command
+- Check package_dir before executing any commands
+
 # 0.2.1 (2014-01-19)
 - Fix Repository#add to remove old entry with same pkgname
 
