@@ -5,7 +5,7 @@ module Akabei
   class Signer
     class KeyNotFound < Error
       attr_reader :key_name
-      def initialize(key)_name
+      def initialize(key_name)
         @key_name = key_name
         super("No such GPG key: #{key_name}")
       end
