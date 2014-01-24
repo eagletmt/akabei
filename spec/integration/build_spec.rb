@@ -45,7 +45,7 @@ describe 'build subcommand', :archlinux do
     end
 
     context 'with --srcdest' do
-      let(:srcdest) { test_dest('sources').tap(&:mkpath) }
+      let(:srcdest) { test_dest('sources') }
       let(:build_command) { base_command + ['--srcdest', srcdest.to_s] }
 
       it 'stores sources' do
@@ -55,7 +55,7 @@ describe 'build subcommand', :archlinux do
     end
 
     context 'with --logdest' do
-      let(:logdest) { test_dest('logs').tap(&:mkpath) }
+      let(:logdest) { test_dest('logs') }
       let(:build_command) { base_command + ['--logdest', logdest.to_s] }
 
       it 'stores logs' do

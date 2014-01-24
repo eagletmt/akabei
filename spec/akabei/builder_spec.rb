@@ -4,7 +4,7 @@ require 'akabei/signer'
 
 describe Akabei::Builder do
   let(:builder) { described_class.new(pkgdest: pkgdest) }
-  let(:pkgdest) { test_dest('packages').tap(&:mkpath) }
+  let(:pkgdest) { test_dest('packages') }
   let(:package_dir) { test_dest('nkf').tap(&:mkpath) }
   let(:pkgname) { 'nkf-2.1.3-1' }
   let(:arch) { 'x86_64' }
@@ -65,7 +65,7 @@ describe Akabei::Builder do
     end
 
     context 'with srcdest' do
-      let(:dest) { test_dest('sources').tap(&:mkpath) }
+      let(:dest) { test_dest('sources') }
 
       before do
         builder.srcdest = dest
@@ -78,7 +78,7 @@ describe Akabei::Builder do
     end
 
     context 'with logdest' do
-      let(:dest) { test_dest('logs').tap(&:mkpath) }
+      let(:dest) { test_dest('logs') }
 
       before do
         builder.logdest = dest

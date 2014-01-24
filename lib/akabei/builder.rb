@@ -36,6 +36,7 @@ module Akabei
     end
 
     def gather_packages(tmp_pkgdest)
+      pkgdest.mkpath
       tmp_pkgdest.each_child.map do |package_path|
         dest = pkgdest.join(package_path.basename)
         copy_and_sign_package(package_path, dest)
@@ -67,6 +68,7 @@ module Akabei
           block.call
         end
       else
+        old_dir.mkpath
         block.call
       end
     ensure
