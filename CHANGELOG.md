@@ -1,3 +1,7 @@
+# 0.3.1 (2014-01-24)
+- Fix typo in Akabei::Signer::KeyNotFound
+- Create destination directories if missing
+
 # 0.3.0 (2014-01-23)
 - Add `akabei omakase remove` command
 - Add `akabei version` command
