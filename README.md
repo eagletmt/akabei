@@ -1,6 +1,6 @@
 # Akabei
 [![Gem Version](https://badge.fury.io/rb/akabei.png)](http://badge.fury.io/rb/akabei)
-[![Build Status](https://secure.travis-ci.org/eagletmt/akabei.png)](https://travis-ci.org/eagletmt/akabei)
+[![Build Status](https://api.travis-ci.org/eagletmt/akabei.png)](https://travis-ci.org/eagletmt/akabei)
 [![Code Climate](https://codeclimate.com/github/eagletmt/akabei.png)](https://codeclimate.com/github/eagletmt/akabei)
 [![Coverage Status](https://coveralls.io/repos/eagletmt/akabei/badge.png)](https://coveralls.io/r/eagletmt/akabei)
 
