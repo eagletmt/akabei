@@ -36,13 +36,26 @@ module Akabei
       end
     end
 
+    class AgentNotFound < Error
+      def initialize
+        super('gpg-agent is not running')
+      end
+    end
+
     def self.get(gpg_key, crypto = nil)
       gpg_key && new(gpg_key, crypto)
     end
 
     def initialize(gpg_key, crypto = nil)
+      check_gpg_agent!
       @gpg_key = find_secret_key(gpg_key)
       @crypto = crypto || GPGME::Crypto.new
+    end
+
+    def check_gpg_agent!
+      if ENV['GPG_AGENT_INFO']
+        raise AgentNotFound.new
+      end
     end
 
     def detach_sign(path)
