@@ -1,3 +1,6 @@
+# 0.3.2 (2014-03-07)
+- Require gpg-agent
+
 # 0.3.1 (2014-01-24)
 - Fix typo in Akabei::Signer::KeyNotFound
 - Create destination directories if missing
