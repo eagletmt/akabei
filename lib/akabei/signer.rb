@@ -53,7 +53,7 @@ module Akabei
     end
 
     def check_gpg_agent!
-      if ENV['GPG_AGENT_INFO']
+      unless ENV['GPG_AGENT_INFO']
         raise AgentNotFound.new
       end
     end
