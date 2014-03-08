@@ -38,7 +38,11 @@ describe Akabei::System do
 
       context 'with command failure' do
         before do
-          allow(Kernel).to receive(:system).and_return(false)
+          status = double('Process::Status with failure')
+          allow(status).to receive(:success?).and_return(false)
+          pid = double('process id')
+          allow(Process).to receive(:waitpid2).with(pid).and_return([pid, status])
+          allow(Kernel).to receive(:spawn).and_return(pid, status)
         end
 
         it 'raises an error' do
@@ -53,13 +57,18 @@ describe Akabei::System do
       let(:arch) { 'armv7h' }
 
       it 'executes sudo and setarch' do
-        expect(Kernel).to receive(:system) { |*args|
+        expect(Kernel).to receive(:spawn) { |*args|
           args = args.dup
           env = args.shift
           opts = args.pop
           expect(args).to eq(%W[setarch #{arch}] + command)
           expect(opts).to_not have_key(:arch)
-          true
+
+          status = double('Process::Status with success')
+          allow(status).to receive(:success?).and_return(true)
+          pid = double('process id')
+          allow(Process).to receive(:waitpid2).with(pid).and_return([pid, status])
+          pid
         }
 
         options.merge!(arch: arch)
@@ -69,7 +78,11 @@ describe Akabei::System do
 
       context 'with command failure' do
         before do
-          allow(Kernel).to receive(:system).and_return(false)
+          status = double('Process::Status with failure')
+          allow(status).to receive(:success?).and_return(false)
+          pid = double('process id')
+          allow(Process).to receive(:waitpid2).with(pid).and_return([pid, status])
+          allow(Kernel).to receive(:spawn).and_return(pid, status)
         end
 
         it 'raises an error' do

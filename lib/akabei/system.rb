@@ -43,9 +43,17 @@ module Akabei
         args = args.dup
         args.unshift('setarch', a)
       end
-      unless Kernel.system(env, *args.map(&:to_s), opts)
+
+      pid = Kernel.spawn(env, *args.map(&:to_s), opts)
+      begin
+        _, status = Process.waitpid2(pid)
+      rescue SignalException => e
+        _, status = Process.waitpid2(pid)
+      end
+      unless status.success?
         raise CommandFailed.new(env, args, opts)
       end
+      status
     end
   end
 end
