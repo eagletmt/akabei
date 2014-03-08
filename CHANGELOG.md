@@ -1,3 +1,6 @@
+# 0.3.4 (2014-03-09)
+- Improve signal handling
+
 # 0.3.3 (2014-03-07)
 - Fix gpg-agent check
 
