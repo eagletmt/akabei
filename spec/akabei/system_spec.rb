@@ -89,6 +89,32 @@ describe Akabei::System do
           expect { described_class.system(command, options) }.to raise_error(Akabei::System::CommandFailed)
         end
       end
+
+      context 'with signal' do
+        before do
+          status = double('Process::Status with success')
+          allow(status).to receive(:success?).and_return(true)
+          pid = double('process id')
+          allow(Kernel).to receive(:spawn).and_return(pid, status)
+
+          cnt = 0
+          allow(Process).to receive(:waitpid2).with(pid) {
+            cnt += 1
+            case cnt
+            when 1
+              raise SignalException.new(2)
+            when 2
+              [pid, status]
+            else
+              raise 'Process receives waitpid2 too many times'
+            end
+          }
+        end
+
+        it 'raises an error even if the process exit code is 0' do
+          expect { described_class.system(command, options) }.to raise_error(Akabei::System::CommandFailed)
+        end
+      end
     end
   end
 end

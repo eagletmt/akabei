@@ -47,10 +47,13 @@ module Akabei
       pid = Kernel.spawn(env, *args.map(&:to_s), opts)
       begin
         _, status = Process.waitpid2(pid)
+        unless status.success?
+          raise CommandFailed.new(env, args, opts)
+        end
       rescue SignalException => e
-        _, status = Process.waitpid2(pid)
-      end
-      unless status.success?
+        # Always raise an error because mkarchroot exits with 0 even if it is
+        # interrupted.
+        Process.waitpid2(pid)
         raise CommandFailed.new(env, args, opts)
       end
       status
