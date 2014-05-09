@@ -25,6 +25,14 @@ namespace :template do
 
     require 'akabei/archive_utils'
     cache_dir = '/var/cache/pacman/pkg'
+    File.open('/etc/pacman.conf') do |f|
+      f.each_line do |line|
+        line.chomp!
+        if m = line.match(/\A\s*CacheDir\s*=\s*(.+)\s*\z/)
+          cache_dir = m[1]
+        end
+      end
+    end
     template_dir = Pathname.new(__FILE__).join('../lib/akabei/omakase/templates')
     %w[i686 x86_64].each do |arch|
       Akabei::ArchiveUtils.each_entry("#{cache_dir}/pacman-#{current_pacman}-#{arch}.pkg.tar.xz") do |entry, archive|
