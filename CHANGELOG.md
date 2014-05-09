@@ -1,3 +1,6 @@
+# 0.3.5 (2014-05-09)
+- Update makepkg.conf template for pacman 4.1.2-6
+
 # 0.3.4 (2014-03-09)
 - Improve signal handling
 
