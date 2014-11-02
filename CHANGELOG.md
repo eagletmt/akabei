@@ -1,3 +1,6 @@
+# 0.4.0 (2014-11-02)
+- Switch to AWS SDK for Ruby v2
+
 # 0.3.5 (2014-05-09)
 - Update makepkg.conf template for pacman 4.1.2-6
 
