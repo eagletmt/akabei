@@ -19,6 +19,6 @@ s3:
   region:
   write_options:
     # :acl: :public_read
-    # :reduced_redundancy: false
+    # :storage_class: REDUCED_REDUNDANCY
     # :server_side_encryption: :aes256
 <%- end -%>
