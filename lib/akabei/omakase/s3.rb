@@ -3,12 +3,12 @@ module Akabei
     class S3
       def initialize(aws_config, shell)
         if aws_config
-          require 'aws-sdk'
-          @bucket = AWS::S3.new(
+          require 'aws-sdk-resources'
+          @bucket = Aws::S3::Resource.new(
             access_key_id: aws_config['access_key_id'],
             secret_access_key: aws_config['secret_access_key'],
             region: aws_config['region'],
-          ).buckets[aws_config['bucket']]
+          ).bucket(aws_config['bucket'])
           @write_options = aws_config['write_options']
           @shell = shell
         end
@@ -34,11 +34,11 @@ module Akabei
       def get(path)
         @shell.say("Download #{path}", :blue)
         path.open('wb') do |f|
-          @bucket.objects[path.to_s].read do |chunk|
+          @bucket.object(path.to_s).get do |chunk|
             f.write(chunk)
           end
         end
-      rescue AWS::S3::Errors::NoSuchKey
+      rescue Aws::S3::Errors::NoSuchKey
         @shell.say("S3: #{path} not found", :red)
         FileUtils.rm_f(path)
       end
@@ -64,7 +64,12 @@ module Akabei
 
       def put(path, mime_type)
         @shell.say("Upload #{path}", :green)
-        @bucket.objects[path.to_s].write(path, @write_options.merge(content_type: mime_type))
+        path.open do |f|
+          @bucket.object(path.to_s).put(@write_options.merge(
+            body: f,
+            content_type: mime_type,
+          ))
+        end
       end
     end
   end

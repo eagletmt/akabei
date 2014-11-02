@@ -94,10 +94,8 @@ describe Akabei::Omakase::CLI do
       let(:bucket_name) { 'test.bucket.name' }
       let(:region) { 'ap-northeast-1' }
 
-      let(:buckets) { double('S3::BucketCollection') }
       let(:bucket) { double('S3::Bucket') }
-      let(:objects) { double('S3::ObjectCollection') }
-      let(:write_options) { { reduced_redundancy: true } }
+      let(:write_options) { { storage_class: 'REDUCED_REDUNDANCY' } }
 
       before do
         c = SafeYAML.load_file('.akabei.yml')
@@ -107,31 +105,28 @@ describe Akabei::Omakase::CLI do
         c['s3']['region'] = region
         c['s3']['write_options'] = write_options
         open('.akabei.yml', 'w') { |f| YAML.dump(c, f) }
-
-        allow_any_instance_of(AWS::S3).to receive(:buckets).and_return(buckets)
       end
 
       it 'uploads built packages and update repositories' do
         %w[i686 x86_64].each do |arch|
           setup_command_expectations(arch, config.package_dir('nkf'))
         end
-        expect(buckets).to receive(:[]).with(bucket_name).and_return(bucket)
-        allow(bucket).to receive(:objects).and_return(objects)
+        allow_any_instance_of(Aws::S3::Resource).to receive(:bucket).with(bucket_name).and_return(bucket)
 
         %w[i686 x86_64].each do |arch|
           %w[test.db test.files test.abs.tar.gz].each do |fname|
             obj = double("S3::Object #{fname}")
             # download and upload
-            expect(objects).to receive(:[]).with("test/os/#{arch}/#{fname}").twice.and_return(obj)
-            expect(obj).to receive(:read).and_yield('')
-            expect(obj).to receive(:write)
+            expect(bucket).to receive(:object).with("test/os/#{arch}/#{fname}").twice.and_return(obj)
+            expect(obj).to receive(:get).and_yield('')
+            expect(obj).to receive(:put)
           end
 
           # upload only
           pkg = double("S3::Object built package (#{arch})")
           db_name = "nkf-2.1.3-1-#{arch}.pkg.tar.xz"
-          expect(objects).to receive(:[]).with("test/os/#{arch}/#{db_name}").and_return(pkg)
-          expect(pkg).to receive(:write).with(anything, hash_including(write_options))
+          expect(bucket).to receive(:object).with("test/os/#{arch}/#{db_name}").and_return(pkg)
+          expect(pkg).to receive(:put).with(hash_including(write_options))
         end
 
         cli.invoke(:build, ['nkf'])
