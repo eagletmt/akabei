@@ -44,9 +44,9 @@ module Akabei
 
         if options[:s3]
           begin
-            require 'aws-sdk-resources'
+            require 'aws-sdk-core'
           rescue LoadError => e
-            say("WARNING: You don't have aws-sdk-resources installed. Disable S3 repository.", :yellow)
+            say("WARNING: You don't have aws-sdk-core installed. Disable S3 repository.", :yellow)
             options[:s3] = false
           end
         end
