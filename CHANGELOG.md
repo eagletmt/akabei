@@ -1,3 +1,6 @@
+# 0.4.1 (2015-01-10)
+- Do not depend on aws-sdk-resources
+
 # 0.4.0 (2014-11-02)
 - Switch to AWS SDK for Ruby v2
 
