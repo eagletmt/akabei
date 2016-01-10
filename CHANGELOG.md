@@ -1,3 +1,6 @@
+# 0.5.0 (2016-01-10)
+- Add `chroot` option to .akabei.yml
+
 # 0.4.1 (2015-01-10)
 - Do not depend on aws-sdk-resources
 
