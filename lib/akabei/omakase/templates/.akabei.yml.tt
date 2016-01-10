@@ -10,6 +10,9 @@ builds:
   <%= arch %>:
     makepkg: etc/makepkg.<%= arch %>.conf
     pacman: etc/pacman.<%= arch %>.conf
+    # Uncomment the following line to keep chroot directory.
+    # btrfs users are recommended to uncomment it.
+    # chroot: ../<%= arch %>-root
 <%- end -%>
 s3:
 <%- if options[:s3] -%>

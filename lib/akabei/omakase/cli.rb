@@ -78,7 +78,7 @@ module Akabei
         s3 = S3.new(config['s3'], shell)
 
         config.builds.each do |arch, config_file|
-          chroot = ChrootTree.new(nil, arch)
+          chroot = ChrootTree.new(config_file['chroot'], arch)
           chroot.makepkg_config = config_file['makepkg']
           chroot.pacman_config = config_file['pacman']
 

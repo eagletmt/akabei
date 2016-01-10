@@ -11,7 +11,7 @@ module Akabei
     attr_path_accessor :makepkg_config, :pacman_config
 
     def initialize(root, arch)
-      @root = root && Pathname.new(root)
+      @root = root && Pathname.new(root).realpath
       @arch = arch
     end
 
@@ -19,7 +19,9 @@ module Akabei
 
     def with_chroot(&block)
       if @root
-        mkarchroot(BASE_PACKAGES)
+        unless @root.join('root').directory?
+          mkarchroot(BASE_PACKAGES)
+        end
         block.call
       else
         @root = Pathname.new(Dir.mktmpdir)
