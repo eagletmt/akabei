@@ -11,7 +11,7 @@ module Akabei
     attr_path_accessor :makepkg_config, :pacman_config
 
     def initialize(root, arch)
-      @root = root && Pathname.new(root).realpath
+      @root = root && Pathname.new(root).tap(&:mkpath).realpath
       @arch = arch
     end
 
