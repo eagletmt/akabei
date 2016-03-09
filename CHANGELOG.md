@@ -1,3 +1,6 @@
+# 0.5.1 (2016-03-10)
+- Create `chroot` directory automatically
+
 # 0.5.0 (2016-01-10)
 - Add `chroot` option to .akabei.yml
 
