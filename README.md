@@ -4,6 +4,9 @@
 [![Code Climate](https://codeclimate.com/github/eagletmt/akabei.svg)](https://codeclimate.com/github/eagletmt/akabei)
 [![Coverage Status](https://img.shields.io/coveralls/eagletmt/akabei.svg)](https://coveralls.io/r/eagletmt/akabei)
 
+**DEPRECATED**
+Use [guzuta](https://github.com/eagletmt/guzuta) instead.
+
 Custom repository manager for ArchLinux pacman.
 
 ## Installation
